@@ -16,6 +16,17 @@ if ($currentFile && ($handle = fopen($currentFile, "r")) !== false) {
     }
     fclose($handle);
 }
+
+// Load tags from tags/tags.csv into associative array by vuln_id
+$tags = [];
+if (($handle = fopen("tags/tags.csv", "r")) !== false) {
+    $headersTags = fgetcsv($handle); // skip header
+    while (($row = fgetcsv($handle)) !== false) {
+        $rowAssoc = array_combine($headersTags, $row);
+        $tags[$rowAssoc['vuln_id']] = $rowAssoc;
+    }
+    fclose($handle);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -138,11 +149,28 @@ if ($currentFile && ($handle = fopen($currentFile, "r")) !== false) {
     font-weight: bold;
     margin-right: 5px;
 }
+
+.tag-btn {
+    margin: 2px;
+    padding: 5px 10px;
+    border: 1px solid #3949ab;
+    border-radius: 4px;
+    background: white;
+    color: #3949ab;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.tag-btn:hover { background: #e8eaf6; }
+.tag-btn.active {
+    background: #3949ab;
+    color: white;
+    box-shadow: 0 0 8px rgba(57,73,171,0.8);
+}
     </style>
 </head>
 <body>
 
-<h2>📝 Nessus Scraper</h2>
+<h2>📝 Nessus Scraper <b>(Vycucávač)</b></h2>
 <div class="file-picker" style="text-align:center; margin:15px 0;">
     <form method="get">
         <label for="file">📂 Choose CSV File:</label>
@@ -160,20 +188,42 @@ if ($currentFile && ($handle = fopen($currentFile, "r")) !== false) {
     <table id="myTable" class="display nowrap stripe hover" style="width:100%">
         <thead>
         <tr>
+	    <th>Tags</th>
             <?php foreach ($headers as $head): ?>
                 <th><?php echo htmlspecialchars($head); ?></th>
             <?php endforeach; ?>
         </tr>
         </thead>
         <tbody>
-        <?php foreach ($data as $row): ?>
-            <tr>
-                <?php foreach ($row as $cell): ?>
-                    <td><?php echo htmlspecialchars($cell); ?></td>
-                <?php endforeach; ?>
-            </tr>
+<?php foreach ($data as $row): 
+      $vulnId = $row[1]; // Assuming vuln_id is column 2 (adjust index)
+      $rowTags = isset($tags[$vulnId]) ? $tags[$vulnId] : ['tag1'=>0,'tag2'=>0,'tag3'=>0];
+?>
+    <tr>
+	<td>
+            <?php for ($i=1; $i<=3; $i++): 
+                $active = $rowTags["tag$i"] == "1";
+            ?>
+                <button class="tag-btn <?= $active ? 'active' : '' ?>" 
+                        data-vuln="<?= $vulnId ?>" data-tag="tag<?= $i ?>">
+                    <?php
+			if($i == 1) {
+			   echo "💀";
+			} elseif($i == 2) {
+                           echo "❗❗❗";
+                        } elseif($i == 3) {
+                           echo "^_^";
+                        }
+		    ?>
+                </button>
+            <?php endfor; ?>
+        </td>
+        <?php foreach ($row as $cell): ?>
+            <td><?php echo htmlspecialchars($cell); ?></td>
         <?php endforeach; ?>
-        </tbody>
+    </tr>
+<?php endforeach; ?>
+</tbody>
     </table>
 </div>
 
@@ -213,6 +263,20 @@ $(document).ready(function() {
             return data ? JSON.parse(data) : null;
         }
     });
+});
+
+$(document).on('click', '.tag-btn', function() {
+    let btn = $(this);
+    let vulnId = btn.data('vuln');
+    let tag = btn.data('tag');
+
+    $.post('toggle_tag.php', { vuln_id: vulnId, tag: tag }, function(res) {
+        if (res.success) {
+            btn.toggleClass('active', res.value === 1);
+        } else {
+            alert("Error updating tag: " + res.message);
+        }
+    }, 'json');
 });
 </script>
 
