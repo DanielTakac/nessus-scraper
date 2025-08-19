@@ -1,0 +1,175 @@
+<?php
+// Load CSV file into an array
+$data = [];
+if (($handle = fopen("nessus.csv", "r")) !== false) {
+    $headers = fgetcsv($handle); // First line = headers
+    while (($row = fgetcsv($handle)) !== false) {
+        $data[] = $row;
+    }
+    fclose($handle);
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dynamic Table Example</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" 
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" type="text/css" 
+          href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css"/>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: #f4f6f9;
+        }
+
+        h2 {
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            background: #3949ab;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        table.dataTable {
+            border-collapse: collapse;
+            width: 100% !important;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table.dataTable thead {
+            background: #3949ab;
+            color: white;
+        }
+
+        table.dataTable thead th {
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        table.dataTable tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        table.dataTable tbody tr:hover {
+            background: #e8eaf6;
+        }
+
+        table.dataTable td {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        /* Style buttons (export, column vis, etc.) */
+        .dt-buttons button {
+            background: #3949ab !important;
+            border: none !important;
+            color: white !important;
+            padding: 6px 12px !important;
+            margin-right: 5px;
+            border-radius: 4px !important;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .dt-buttons button:hover {
+            background: #303f9f !important;
+        }
+
+        /* Search bar and page length dropdown styling */
+        .dataTables_filter input {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px;
+            margin-left: 8px;
+        }
+
+        .dataTables_length select {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 4px;
+        }
+
+        /* Pagination buttons */
+        .dataTables_paginate a {
+            padding: 6px 10px !important;
+            border-radius: 4px;
+            margin: 2px;
+            border: 1px solid #ddd !important;
+            color: #3949ab !important;
+            text-decoration: none !important;
+        }
+
+        .dataTables_paginate a.current {
+            background-color: #3949ab !important;
+            color: white !important;
+            border: 1px solid #3949ab !important;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📝 Nessus Scraper</h2>
+<div class="container">
+    <table id="myTable" class="display nowrap stripe hover" style="width:100%">
+        <thead>
+        <tr>
+            <?php foreach ($headers as $head): ?>
+                <th><?php echo htmlspecialchars($head); ?></th>
+            <?php endforeach; ?>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($data as $row): ?>
+            <tr>
+                <?php foreach ($row as $cell): ?>
+                    <td><?php echo htmlspecialchars($cell); ?></td>
+                <?php endforeach; ?>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<!-- DataTables Buttons plugins -->
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#myTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['colvis','copy','csv','excel','pdf','print'],
+        responsive: true,
+        paging: true,
+        searching: true,
+        ordering: true
+    });
+});
+</script>
+
+</body>
+</html>
