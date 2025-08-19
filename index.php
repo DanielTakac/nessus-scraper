@@ -1,7 +1,15 @@
 <?php
-// Load CSV file into an array
+// Scan directory for CSV files
+$csvFiles = glob("*.csv");
+
+// If user picked a file via GET param, use it, otherwise the first one
+$currentFile = isset($_GET['file']) && in_array($_GET['file'], $csvFiles)
+    ? $_GET['file']
+    : (count($csvFiles) ? $csvFiles[0] : null);
+
 $data = [];
-if (($handle = fopen("nessus.csv", "r")) !== false) {
+$headers = [];
+if ($currentFile && ($handle = fopen($currentFile, "r")) !== false) {
     $headers = fgetcsv($handle); // First line = headers
     while (($row = fgetcsv($handle)) !== false) {
         $data[] = $row;
@@ -119,11 +127,35 @@ if (($handle = fopen("nessus.csv", "r")) !== false) {
             color: white !important;
             border: 1px solid #3949ab !important;
         }
+	.file-picker select {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-left: 5px;
+}
+.file-picker label {
+    font-weight: bold;
+    margin-right: 5px;
+}
     </style>
 </head>
 <body>
 
 <h2>📝 Nessus Scraper</h2>
+<div class="file-picker" style="text-align:center; margin:15px 0;">
+    <form method="get">
+        <label for="file">📂 Choose CSV File:</label>
+        <select id="file" name="file" onchange="this.form.submit()">
+            <?php foreach ($csvFiles as $f): ?>
+                <option value="<?php echo htmlspecialchars($f); ?>" 
+                    <?php if ($f === $currentFile) echo 'selected'; ?>>
+                    <?php echo htmlspecialchars($f); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </form>
+</div>
 <div class="container">
     <table id="myTable" class="display nowrap stripe hover" style="width:100%">
         <thead>
@@ -160,13 +192,26 @@ if (($handle = fopen("nessus.csv", "r")) !== false) {
 
 <script>
 $(document).ready(function() {
+    // PHP variable output so JS knows which file is currently active
+    var currentFile = "<?php echo $currentFile; ?>";
+
     $('#myTable').DataTable({
         dom: 'Bfrtip',
-        buttons: ['colvis','copy','csv','excel','pdf','print'],
+        buttons: ['colvis','pageLength','colvisRestore','copy','csv','excel','pdf'],
         responsive: true,
         paging: true,
         searching: true,
-        ordering: true
+        ordering: true,
+	stateSave: true,
+
+        // 👉 Use per-file storage key
+        stateSaveCallback: function(settings, data) {
+            localStorage.setItem('DataTables_' + currentFile, JSON.stringify(data));
+        },
+        stateLoadCallback: function(settings) {
+            var data = localStorage.getItem('DataTables_' + currentFile);
+            return data ? JSON.parse(data) : null;
+        }
     });
 });
 </script>
