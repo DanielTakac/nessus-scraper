@@ -166,6 +166,56 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
     color: white;
     box-shadow: 0 0 8px rgba(57,73,171,0.8);
 }
+
+.tag-filters {
+    text-align: left;
+    margin: 15px;
+}
+
+.filter-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    margin: 0 6px 8px 0;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    border: 2px solid #3949ab;
+    background: #fff;
+    color: #3949ab;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.filter-btn:hover {
+    background: #e8eaf6;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+.filter-btn.active {
+    background: #3949ab;
+    color: #fff;
+    border-color: #3949ab;
+    box-shadow: 0 4px 8px rgba(57,73,171,0.3);
+}
+
+.site-footer {
+    text-align: center;
+    padding: 15px;
+    background: #3949ab;
+    color: white;
+    font-size: 14px;
+    position: fixed;   /* Sticks to bottom */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.15);
+}
+
+.site-footer p {
+    margin: 0;
+}
     </style>
 </head>
 <body>
@@ -185,13 +235,22 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
     </form>
 </div>
 <div class="container">
+    <div class="tag-filters" style="text-align:left; margin:15px;">
+        <button class="filter-btn" data-filter="all">Reset Filter</button>
+        <button class="filter-btn" data-filter="tag1">Filter Tag #1</button>
+        <button class="filter-btn" data-filter="tag2">Filter Tag #2</button>
+        <button class="filter-btn" data-filter="tag3">Filter Tag #3</button>
+    </div>
     <table id="myTable" class="display nowrap stripe hover" style="width:100%">
         <thead>
         <tr>
-	    <th>Tags</th>
             <?php foreach ($headers as $head): ?>
                 <th><?php echo htmlspecialchars($head); ?></th>
             <?php endforeach; ?>
+	    <th>Tags</th>
+	    <th style="display:none;">tag1</th>
+	    <th style="display:none;">tag2</th>
+	    <th style="display:none;">tag3</th>
         </tr>
         </thead>
         <tbody>
@@ -200,6 +259,9 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
       $rowTags = isset($tags[$vulnId]) ? $tags[$vulnId] : ['tag1'=>0,'tag2'=>0,'tag3'=>0];
 ?>
     <tr>
+	<?php foreach ($row as $cell): ?>
+            <td><?php echo htmlspecialchars($cell); ?></td>
+        <?php endforeach; ?>
 	<td>
             <?php for ($i=1; $i<=3; $i++): 
                 $active = $rowTags["tag$i"] == "1";
@@ -212,15 +274,15 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
 			} elseif($i == 2) {
                            echo "❗❗❗";
                         } elseif($i == 3) {
-                           echo "^_^";
+                           echo "🤑🤑🤑";
                         }
 		    ?>
                 </button>
             <?php endfor; ?>
         </td>
-        <?php foreach ($row as $cell): ?>
-            <td><?php echo htmlspecialchars($cell); ?></td>
-        <?php endforeach; ?>
+	<td style="display:none;"><?= $rowTags['tag1'] ?></td>
+	<td style="display:none;"><?= $rowTags['tag2'] ?></td>
+	<td style="display:none;"><?= $rowTags['tag3'] ?></td>
     </tr>
 <?php endforeach; ?>
 </tbody>
@@ -245,7 +307,7 @@ $(document).ready(function() {
     // PHP variable output so JS knows which file is currently active
     var currentFile = "<?php echo $currentFile; ?>";
 
-    $('#myTable').DataTable({
+    var table = $('#myTable').DataTable({
         dom: 'Bfrtip',
         buttons: ['colvis','pageLength','colvisRestore','copy','csv','excel','pdf'],
         responsive: true,
@@ -253,6 +315,8 @@ $(document).ready(function() {
         searching: true,
         ordering: true,
 	stateSave: true,
+	stateDuration: -1,
+        columnDefs: [{ targets: [-3, -2, -1], visible: false, searchable: false }],
 
         // 👉 Use per-file storage key
         stateSaveCallback: function(settings, data) {
@@ -263,6 +327,33 @@ $(document).ready(function() {
             return data ? JSON.parse(data) : null;
         }
     });
+
+    // Keep track of active filter
+    var activeFilter = 'all';
+
+$.fn.dataTable.ext.search.push(function(settings, data, dataIndex, rowData) {
+    if (activeFilter === 'all') return true;
+
+    // Map tag name to column index (counting from end)
+    var colIndex = {
+        'tag1': -3,
+        'tag2': -2,
+        'tag3': -1
+    }[activeFilter];
+
+    // DataTables gives `rowData` array; "-1, -2, -3" from end means:
+    var val = rowData[rowData.length + colIndex];
+    return val === "1";
+});
+
+// Button binding
+$('.filter-btn').on('click', function() {
+    $('.filter-btn').removeClass('active');
+    $(this).addClass('active');
+    activeFilter = $(this).data('filter');
+    table.draw();
+});
+
 });
 
 $(document).on('click', '.tag-btn', function() {
@@ -281,4 +372,7 @@ $(document).on('click', '.tag-btn', function() {
 </script>
 
 </body>
+<footer class="site-footer">
+    <p>🔒 Nessus Scraper &copy; <?php echo date("Y"); ?> Daniel Takáč + GPT-5 :)</p>
+</footer>
 </html>
