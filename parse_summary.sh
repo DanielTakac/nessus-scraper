@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
-# parse_summary.sh  – turn summary.html into CSV of (group, link, vulnerability)
+# Parsuje summary.html z /var/www/html/R/ na csv subor ktory potom moze php citat a zobrazit tabulku s nessus scanom na stranke
+# D. Takac 20/08/2025
 #
 
 INPUT_FILE=${1:-summary.html}

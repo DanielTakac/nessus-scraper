@@ -32,7 +32,7 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Dynamic Table Example</title>
+    <title>🔎 Nessus Scraper</title>
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" 
           href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"/>
@@ -58,7 +58,10 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
         }
 
         .container {
-            padding: 30px;
+            padding-left: 30px;
+            padding-right: 30px;
+	    padding-bottom: 30px;
+            padding-top: 5px;
         }
 
         table.dataTable {
@@ -243,11 +246,51 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
     z-index: 10;
     box-shadow: 0 3px 6px rgba(0,0,0,0.2);
 }
+
+/* cap the link column */
+td.link-cell {
+  max-width: 80px;      /* or whatever you like */
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+/* optional: make the anchor fill the cell */
+td.link-cell a {
+  display: inline-block;
+  width: 100%;
+  text-decoration: none;
+  color: #3949ab;
+  font-weight: bold;
+}
+td.link-cell a:hover {
+  text-decoration: underline;
+}
+
+.btn-run-parse {
+  background: #3a6ce0;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+.btn-run-parse:hover {
+  background: #275fe3;
+}
+
+#myTable_info {
+    margin-bottom: 50px;
+}
     </style>
 </head>
 <body>
 
-<h2>📝 Nessus Scraper - <b>"Vycucávač"</b></h2>
+<h2>📝 Nessus Scraper<!-- - <b>"Vycucávač"--></b></h2>
+<div style="text-align:center; margin:15px;">
+    <button id="run-parse" class="btn-run-parse">🔄 Refresh Nessus Report</button>
+</div>
 <div class="file-picker" style="text-align:center; margin:15px 0;">
     <form method="get">
         <label for="file">📂 Choose CSV File:</label>
@@ -261,12 +304,13 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
         </select>
     </form>
 </div>
+
 <div class="container">
     <div class="tag-filters" style="text-align:left; margin:15px;">
         <button class="filter-btn" data-filter="all">Reset Filter</button>
-        <button class="filter-btn" data-filter="tag1">Filter Tag #1</button>
-        <button class="filter-btn" data-filter="tag2">Filter Tag #2</button>
-        <button class="filter-btn" data-filter="tag3">Filter Tag #3</button>
+        <button class="filter-btn" data-filter="tag1">Filter Tag ⚠️</button>
+        <button class="filter-btn" data-filter="tag2">Filter Tag ⭐</button>
+        <button class="filter-btn" data-filter="tag3">Filter Tag ❓</button>
     </div>
     <table id="myTable" class="display nowrap stripe hover" style="width:100%">
         <thead>
@@ -289,11 +333,21 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
   data-tag1="<?= $rowTags['tag1'] ?>" 
   data-tag2="<?= $rowTags['tag2'] ?>" 
   data-tag3="<?= $rowTags['tag3'] ?>">
-	<?php foreach ($row as $cell): ?>
-            <td title="<?php echo htmlspecialchars($cell); ?>">
-    		<?php echo htmlspecialchars($cell); ?>
-	    </td>
-        <?php endforeach; ?>
+	<?php foreach ($row as $colIdx => $cell): ?>
+      <?php if ($colIdx === 3): // 4th column = link ?>
+        <td class="link-cell" title="<?php echo htmlspecialchars($cell) ?>">
+          <a href="<?php echo htmlspecialchars($cell) ?>"
+             target="_blank"
+             rel="noopener noreferrer">
+            🔗 Link
+          </a>
+        </td>
+      <?php else: ?>
+        <td title="<?php echo htmlspecialchars($cell) ?>">
+          <?php echo htmlspecialchars($cell) ?>
+        </td>
+      <?php endif; ?>
+    <?php endforeach; ?>
 	<td>
             <?php for ($i=1; $i<=3; $i++): 
                 $active = $rowTags["tag$i"] == "1";
@@ -302,11 +356,11 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
                         data-vuln="<?= $vulnId ?>" data-tag="tag<?= $i ?>">
                     <?php
 			if($i == 1) {
-			   echo "1️⃣";
+			   echo "⚠️";
 			} elseif($i == 2) {
-                           echo "2️⃣2️⃣";
+                           echo "⭐";
                         } elseif($i == 3) {
-                           echo "3️⃣3️⃣3️⃣";
+                           echo "❓";
                         }
 		    ?>
                 </button>
@@ -400,10 +454,28 @@ $('#myTable tbody').on('click', '.tag-btn', function(){
     table.draw(false);
   }, 'json');
 });
+
+$('#run-parse').on('click', function() {
+  // if (!confirm("This will regenerate the CSV files. Continue?")) return;
+
+  $(this).prop('disabled', true).text('⏳ Generating…');
+
+  $.get('run_parser.php', function(res) {
+    if (res.message !== "CSV generated successfully") {
+      alert(res.message);
+    }
+    console.log(res.output); // see server logs in console
+    location.reload(); // refresh to show new CSVs
+  }, 'json').fail(function() {
+    alert("Error: could not run parser script");
+  }).always(function() {
+    $('#run-parse').prop('disabled', false).text('✅ CSV File Generated');
+  });
+});
 </script>
 
 </body>
 <footer class="site-footer">
-    <p>🔒 Nessus Scraper &copy; <?php echo date("Y"); ?> Daniel Takáč + GPT-5 :)</p>
+    <p>🔒 Nessus Scraper &copy; <?php echo date("Y"); ?> Daniel Takáč</p>
 </footer>
 </html>
