@@ -216,11 +216,38 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
 .site-footer p {
     margin: 0;
 }
+
+/* Cap max column width and ellipsize overflow */
+#myTable td {
+    max-width: 200px;        /* ← set your X pixels here */
+    white-space: nowrap;     /* prevent wrapping */
+    overflow: hidden;        /* hide overflow text */
+    text-overflow: ellipsis; /* show … when truncated */
+    position: relative;      /* needed for tooltip */
+    cursor: help;
+}
+
+/* Show full content on hover via tooltip-like effect */
+#myTable td:hover::after {
+    content: attr(title);     /* display full text from title attr */
+    position: absolute;
+    left: 0;
+    top: 100%;
+    white-space: normal;
+    background: #333;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    max-width: 400px;
+    z-index: 10;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
     </style>
 </head>
 <body>
 
-<h2>📝 Nessus Scraper <b>(Vycucávač)</b></h2>
+<h2>📝 Nessus Scraper - <b>"Vycucávač"</b></h2>
 <div class="file-picker" style="text-align:center; margin:15px 0;">
     <form method="get">
         <label for="file">📂 Choose CSV File:</label>
@@ -255,12 +282,14 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
         </thead>
         <tbody>
 <?php foreach ($data as $row): 
-      $vulnId = $row[1]; // Assuming vuln_id is column 2 (adjust index)
+      $vulnId = $row[1]; // Assuming vuln_id is column 1 (adjust index)
       $rowTags = isset($tags[$vulnId]) ? $tags[$vulnId] : ['tag1'=>0,'tag2'=>0,'tag3'=>0];
 ?>
     <tr>
 	<?php foreach ($row as $cell): ?>
-            <td><?php echo htmlspecialchars($cell); ?></td>
+            <td title="<?php echo htmlspecialchars($cell); ?>">
+    		<?php echo htmlspecialchars($cell); ?>
+	    </td>
         <?php endforeach; ?>
 	<td>
             <?php for ($i=1; $i<=3; $i++): 
@@ -270,11 +299,11 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
                         data-vuln="<?= $vulnId ?>" data-tag="tag<?= $i ?>">
                     <?php
 			if($i == 1) {
-			   echo "💀";
+			   echo "1️⃣";
 			} elseif($i == 2) {
-                           echo "❗❗❗";
+                           echo "2️⃣2️⃣";
                         } elseif($i == 3) {
-                           echo "🤑🤑🤑";
+                           echo "3️⃣3️⃣3️⃣";
                         }
 		    ?>
                 </button>
