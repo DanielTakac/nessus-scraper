@@ -275,9 +275,9 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
                 <th><?php echo htmlspecialchars($head); ?></th>
             <?php endforeach; ?>
 	    <th>Tags</th>
-	    <th style="display:none;">tag1</th>
-	    <th style="display:none;">tag2</th>
-	    <th style="display:none;">tag3</th>
+	    <th class="tag1" style="display:none;">tag1</th>
+	    <th class="tag2" style="display:none;">tag2</th>
+	    <th class="tag3" style="display:none;">tag3</th>
         </tr>
         </thead>
         <tbody>
@@ -362,19 +362,16 @@ $(document).ready(function() {
 
 $.fn.dataTable.ext.search.push(function(settings, data, dataIndex, rowData) {
     if (activeFilter === 'all') return true;
-
     // Map tag name to column index (counting from end)
     var colIndex = {
         'tag1': -3,
         'tag2': -2,
         'tag3': -1
     }[activeFilter];
-
     // DataTables gives `rowData` array; "-1, -2, -3" from end means:
     var val = rowData[rowData.length + colIndex];
     return val === "1";
 });
-
 // Button binding
 $('.filter-btn').on('click', function() {
     $('.filter-btn').removeClass('active');
@@ -382,14 +379,11 @@ $('.filter-btn').on('click', function() {
     activeFilter = $(this).data('filter');
     table.draw();
 });
-
 });
-
 $(document).on('click', '.tag-btn', function() {
     let btn = $(this);
     let vulnId = btn.data('vuln');
     let tag = btn.data('tag');
-
     $.post('toggle_tag.php', { vuln_id: vulnId, tag: tag }, function(res) {
         if (res.success) {
             btn.toggleClass('active', res.value === 1);

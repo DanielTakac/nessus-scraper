@@ -1,3 +1,0 @@
-scan_type,isWas,folder_id,type,read,last_modification_date,creation_date,status,uuid,shared,user_permissions,owner,timezone,rrules,starttime,enabled,control,live_results,agent_scan_launch_type,name,id
-vuln,,3,local,True,1754633922,1754632868,completed,3c2266ea-6e6f-dfc3-289b-1771755be29f68fc22b50975d64b,False,128,danieltakac,Europe/Bratislava,FREQ=WEEKLY;INTERVAL=1;BYDAY=TH,20250814T170000,True,True,,,My Basic Network Scan,8
-discovery,,3,local,True,1754632841,1754632732,completed,ed8913e7-92cb-04db-11a3-43abdb969bfa46589206238fa1c7,False,128,danieltakac,,,,False,True,0.0,,My Host Discovery Scan,5

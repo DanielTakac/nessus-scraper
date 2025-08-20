@@ -1,5 +1,0 @@
-id,vuln_id,name,email,created_at
-1,101,Alice,alice@example.com,2023-07-01
-2,102,Bob,bob@example.com,2023-07-05
-3,103,Charlie,charlie@example.com,2023-07-09
-4,104,Diana,diana@example.com,2023-07-12
