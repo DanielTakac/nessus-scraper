@@ -285,7 +285,10 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
       $vulnId = $row[1]; // Assuming vuln_id is column 1 (adjust index)
       $rowTags = isset($tags[$vulnId]) ? $tags[$vulnId] : ['tag1'=>0,'tag2'=>0,'tag3'=>0];
 ?>
-    <tr>
+    <tr 
+  data-tag1="<?= $rowTags['tag1'] ?>" 
+  data-tag2="<?= $rowTags['tag2'] ?>" 
+  data-tag3="<?= $rowTags['tag3'] ?>">
 	<?php foreach ($row as $cell): ?>
             <td title="<?php echo htmlspecialchars($cell); ?>">
     		<?php echo htmlspecialchars($cell); ?>
@@ -360,18 +363,14 @@ $(document).ready(function() {
     // Keep track of active filter
     var activeFilter = 'all';
 
-$.fn.dataTable.ext.search.push(function(settings, data, dataIndex, rowData) {
-    if (activeFilter === 'all') return true;
-    // Map tag name to column index (counting from end)
-    var colIndex = {
-        'tag1': -3,
-        'tag2': -2,
-        'tag3': -1
-    }[activeFilter];
-    // DataTables gives `rowData` array; "-1, -2, -3" from end means:
-    var val = rowData[rowData.length + colIndex];
-    return val === "1";
+$.fn.dataTable.ext.search.push(function(settings, data, dataIndex){
+  if(activeFilter === 'all') return true;
+  // get the <tr> for this row
+  var rowNode = table.row(dataIndex).node();
+  // read the live data-attribute
+  return $(rowNode).attr('data-' + activeFilter) === '1';
 });
+
 // Button binding
 $('.filter-btn').on('click', function() {
     $('.filter-btn').removeClass('active');
@@ -380,17 +379,26 @@ $('.filter-btn').on('click', function() {
     table.draw();
 });
 });
-$(document).on('click', '.tag-btn', function() {
-    let btn = $(this);
-    let vulnId = btn.data('vuln');
-    let tag = btn.data('tag');
-    $.post('toggle_tag.php', { vuln_id: vulnId, tag: tag }, function(res) {
-        if (res.success) {
-            btn.toggleClass('active', res.value === 1);
-        } else {
-            alert("Error updating tag: " + res.message);
-        }
-    }, 'json');
+
+$('#myTable tbody').on('click', '.tag-btn', function(){
+  var btn    = $(this),
+      tr     = btn.closest('tr'),
+      tag    = btn.data('tag'),     // "tag1","tag2","tag3"
+      vulnId = btn.data('vuln');
+
+  $.post('toggle_tag.php', { vuln_id: vulnId, tag: tag }, function(res){
+    if(!res.success){
+      return alert("Error: "+res.message);
+    }
+    // 1) toggle the button UI
+    btn.toggleClass('active', res.value === 1);
+
+    // 2) update the <tr> data-attribute
+    tr.attr('data-' + tag, res.value);
+
+    // 3) re-filter/re-draw immediately
+    table.draw(false);
+  }, 'json');
 });
 </script>
 
