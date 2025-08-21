@@ -10,7 +10,7 @@ OUTPUT_FILE=${2:-summary.csv}
 rm $OUTPUT_FILE
 
 # Print header
-printf 'id,vuln_id,server_group,link,vulnerability\n' > "$OUTPUT_FILE"
+printf 'id,vuln_id,server_group,link,base_score,temporal_score,servers_affected,vulnerability\n' > "$OUTPUT_FILE"
 
 current_group=""
 row_id=0
@@ -33,6 +33,8 @@ while IFS= read -r line; do
   # 2) When you see an <li> with href="…", grab link + text
   if [[ $line =~ href=\"([^\"]+)\" ]]; then
     link="${BASH_REMATCH[1]}"
+    # replace IP with hostname
+    link="${link//10.35.160.166/nessus-reports.okte.sk}"
 
     # extract the text between the first > and </a>
     vuln=$(echo "$line" \
@@ -48,8 +50,8 @@ while IFS= read -r line; do
     row_id=$((row_id+1))
 
     # emit CSV row, quoting fields
-    printf '"%d","%s","%s","%s","%s"\n' \
-      "$row_id" "$vuln_id" "$current_group" "$link" "$vuln" \
+    printf '"%d","%s","%s","%s","%s","%s","%s","%s"\n' \
+      "$row_id" "$vuln_id" "$current_group" "$link" "" "" "" "$vuln" \
       >> "$OUTPUT_FILE"
   fi
 
