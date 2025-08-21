@@ -8,3 +8,5 @@ id,vuln_id,tag1,tag2,tag3
 7,2386ba96a8,0,0,0
 8,de4a66faf6,0,0,0
 9,362bd0bb75,0,0,0
+10,aada6ec29b,1,0,0
+11,ad56d58138,0,1,0

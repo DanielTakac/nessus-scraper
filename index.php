@@ -205,7 +205,7 @@ if (($handle = fopen("tags/tags.csv", "r")) !== false) {
 
 .site-footer {
     text-align: center;
-    padding: 15px;
+    padding: 8px;
     background: #3949ab;
     color: white;
     font-size: 14px;
