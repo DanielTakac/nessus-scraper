@@ -1,0 +1,243 @@
+body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: #f4f6f9;
+        }
+
+        h2 {
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            background: #3949ab;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .container {
+            padding-left: 30px;
+            padding-right: 30px;
+            padding-bottom: 30px;
+            padding-top: 5px;
+        }
+
+        table.dataTable {
+            border-collapse: collapse;
+            width: 100% !important;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table.dataTable thead {
+            background: #3949ab;
+            color: white;
+        }
+
+        table.dataTable thead th {
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        table.dataTable tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        table.dataTable tbody tr:hover {
+            background: #e8eaf6;
+        }
+
+        table.dataTable td {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        /* Style buttons (export, column vis, etc.) */
+        .dt-buttons button {
+            background: #3949ab !important;
+            border: none !important;
+            color: white !important;
+            padding: 6px 12px !important;
+            margin-right: 5px;
+            border-radius: 4px !important;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .dt-buttons button:hover {
+            background: #303f9f !important;
+        }
+
+        /* Search bar and page length dropdown styling */
+        .dataTables_filter input {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px;
+            margin-left: 8px;
+        }
+
+        .dataTables_length select {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 4px;
+        }
+
+        /* Pagination buttons */
+        .dataTables_paginate a {
+            padding: 6px 10px !important;
+            border-radius: 4px;
+            margin: 2px;
+            border: 1px solid #ddd !important;
+            color: #3949ab !important;
+            text-decoration: none !important;
+        }
+
+        .dataTables_paginate a.current {
+            background-color: #3949ab !important;
+            color: white !important;
+            border: 1px solid #3949ab !important;
+        }
+        .file-picker select {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-left: 5px;
+}
+.file-picker label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.tag-btn {
+    margin: 2px;
+    padding: 5px 10px;
+    border: 1px solid #3949ab;
+    border-radius: 4px;
+    background: white;
+    color: #3949ab;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.tag-btn:hover { background: #e8eaf6; }
+.tag-btn.active {
+    background: #3949ab;
+    color: white;
+    box-shadow: 0 0 8px rgba(57,73,171,0.8);
+}
+
+.tag-filters {
+    text-align: left;
+    margin: 15px;
+}
+
+.filter-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    margin: 0 6px 8px 0;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 10px;
+    border: 2px solid #3949ab;
+    background: #fff;
+    color: #3949ab;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.filter-btn:hover {
+    background: #e8eaf6;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+.filter-btn.active {
+    background: #3949ab;
+    color: #fff;
+    border-color: #3949ab;
+    box-shadow: 0 4px 8px rgba(57,73,171,0.3);
+}
+
+.site-footer {
+    text-align: center;
+    padding: 8px;
+    background: #3949ab;
+    color: white;
+    font-size: 14px;
+    position: fixed;   /* Sticks to bottom */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.15);
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+/* Cap max column width and ellipsize overflow */
+#myTable td {
+    max-width: 200px;        /* ← set your X pixels here */
+    white-space: nowrap;     /* prevent wrapping */
+    overflow: hidden;        /* hide overflow text */
+    text-overflow: ellipsis; /* show … when truncated */
+    position: relative;      /* needed for tooltip */
+    cursor: help;
+}
+
+/* Show full content on hover via tooltip-like effect */
+#myTable td:hover::after {
+    content: attr(title);     /* display full text from title attr */
+    position: absolute;
+    left: 0;
+    top: 100%;
+    white-space: normal;
+    background: #333;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    max-width: 400px;
+    z-index: 10;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+/* cap the link column */
+td.link-cell {
+  max-width: 80px;      /* or whatever you like */
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+/* optional: make the anchor fill the cell */
+td.link-cell a {
+  display: inline-block;
+  width: 100%;
+  text-decoration: none;
+  color: #3949ab;
+  font-weight: bold;
+}
+td.link-cell a:hover {
+  text-decoration: underline;
+}
+
+.btn-run-parse {
+  background: #3a6ce0;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+.btn-run-parse:hover {
+  background: #275fe3;
+}
+
+#myTable_info {
+    margin-bottom: 50px;
+}

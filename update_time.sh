@@ -9,3 +9,5 @@ DEST="time.html"
 # Extract the line and overwrite the destination file
 grep '^<b><pre>Report was parsed at' "$SOURCE" > "$DEST"
 
+echo "Wrote report update time to time.html"
+
