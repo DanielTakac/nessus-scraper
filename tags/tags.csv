@@ -1,2 +1,5 @@
-id,server_group,tags
+id,vuln_id,tags
 1,0000000000,internal;important;test_tag
+1,3f35ad39e6,0,0,0
+1,65cf285ee3,0,0,0
+1,fa8305aa74,0,0,0
