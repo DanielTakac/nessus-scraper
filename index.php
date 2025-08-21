@@ -307,10 +307,10 @@ td.link-cell a:hover {
 
 <div class="container">
     <div class="tag-filters" style="text-align:left; margin:15px;">
-        <button class="filter-btn" data-filter="all">Reset Filter</button>
-        <button class="filter-btn" data-filter="tag1">Filter Tag ⚠️</button>
-        <button class="filter-btn" data-filter="tag2">Filter Tag ⭐</button>
-        <button class="filter-btn" data-filter="tag3">Filter Tag ❓</button>
+        <button class="filter-btn" data-filter="all">Remove Filter</button>
+        <button class="filter-btn" data-filter="tag1">Filter External <?php echo '<img src="img/external-sys-tag.png" alt="External" width="15" height="15"/>'; ?></button>
+        <button class="filter-btn" data-filter="tag2">Filter Internal <?php echo '<img src="img/internal-sys-tag.png" alt="Internal" width="15" height="15"/>'; ?></button>
+        <button class="filter-btn" data-filter="tag3">Filter Important <?php echo '<img src="img/warning-tag.png" alt="Important" width="15" height="15"/>'; ?></button>
     </div>
     <table id="myTable" class="display nowrap stripe hover" style="width:100%">
         <thead>
@@ -356,11 +356,11 @@ td.link-cell a:hover {
                         data-vuln="<?= $vulnId ?>" data-tag="tag<?= $i ?>">
                     <?php
 			if($i == 1) {
-			   echo "⚠️";
+			   echo '<img src="img/external-sys-tag.png" alt="External" width="20" height="20"/>';
 			} elseif($i == 2) {
-                           echo "⭐";
+                           echo '<img src="img/internal-sys-tag.png" alt="Internal" width="20" height="20"/>';
                         } elseif($i == 3) {
-                           echo "❓";
+                           echo '<img src="img/warning-tag.png" alt="Important" width="20" height="20"/>';
                         }
 		    ?>
                 </button>
@@ -402,6 +402,10 @@ $(document).ready(function() {
         ordering: true,
 	stateSave: true,
 	stateDuration: -1,
+	lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, "All"]
+        ],
         columnDefs: [{ targets: [-3, -2, -1], visible: false, searchable: false }],
 
         // 👉 Use per-file storage key

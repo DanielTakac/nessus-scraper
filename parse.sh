@@ -4,3 +4,5 @@
 
 ./parse_summary.sh ../R/summary_high.html high.csv
 
+./update_time.sh
+
