@@ -133,9 +133,9 @@ foreach($allTags as $t){
 <?php endforeach; ?>
 </tbody>
     </table>
+<div id="sumDisplay">
+    Total vulnerabilities found: 0
 </div>
-<div id="sumDisplay" style="margin:15px; font-weight:bold;">
-    Sum: 0
 </div>
 
 <!-- jQuery -->
@@ -195,7 +195,7 @@ $(document).ready(function() {
             }
         });
 
-        $('#sumDisplay').text('Sum: ' + sum.toLocaleString());
+        $('#sumDisplay').text('Total vulnerabilities found: ' + sum.toLocaleString());
         });
 
     // Trigger once on start
