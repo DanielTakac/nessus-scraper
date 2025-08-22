@@ -16,6 +16,18 @@ if ($currentFile && ($handle = fopen($currentFile, "r")) !== false) {
     }
     fclose($handle);
 }
+
+// Load tag associations
+$tagsData = [];
+$tagsFile = "tags/tags.csv";
+if (file_exists($tagsFile) && ($h = fopen($tagsFile, "r")) !== false) {
+    $hdr = fgetcsv($h);
+    while (($row = fgetcsv($h)) !== false) {
+        [$id, $sg, $tagsStr] = $row;
+        $tagsData[$sg] = array_filter(explode(";", $tagsStr));
+    }
+    fclose($h);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -60,6 +72,17 @@ if ($currentFile && ($handle = fopen($currentFile, "r")) !== false) {
         }
     ?>
 </div>
+<div class="tag-filters">
+<?php
+$allTags = [];
+foreach($tagsData as $sg=>$tg) $allTags = array_merge($allTags,$tg);
+$allTags = array_unique($allTags);
+foreach($allTags as $t){
+    echo '<button class="filter-btn" data-filter="'.htmlspecialchars($t).'">'.htmlspecialchars($t).'</button>';
+}
+?>
+<button class="filter-btn" data-filter="all">Show All</button>
+</div>
 <div class="container">
     <table id="myTable" class="display nowrap stripe hover" style="width:100%">
         <thead>
@@ -70,26 +93,38 @@ if ($currentFile && ($handle = fopen($currentFile, "r")) !== false) {
 	    <th>Tags</th>
         </tr>
         </thead>
-        <tbody>
-    <tr 
-	<?php foreach ($row as $colIdx => $cell): ?>
-      <?php if ($colIdx === 3): // 4th column = link ?>
-        <td class="link-cell" title="<?php echo htmlspecialchars($cell) ?>">
-          <a href="<?php echo htmlspecialchars($cell) ?>"
-             target="_blank"
-             rel="noopener noreferrer">
-            🔗 Link
-          </a>
-        </td>
-      <?php else: ?>
-        <td title="<?php echo htmlspecialchars($cell) ?>">
-          <?php echo htmlspecialchars($cell) ?>
-        </td>
-      <?php endif; ?>
-    <?php endforeach; ?>
+<tbody>
+<?php foreach ($data as $row): ?>
+    <tr>
+        <?php foreach ($row as $colIdx => $cell): ?>
+            <?php if ($colIdx === 3): // Example: 4th column is a link ?>
+                <td class="link-cell" title="<?php echo htmlspecialchars($cell) ?>">
+                  <a href="<?php echo htmlspecialchars($cell) ?>"
+                     target="_blank"
+                     rel="noopener noreferrer">
+                    🔗 Link
+                  </a>
+                </td>
+            <?php else: ?>
+                <td title="<?php echo htmlspecialchars($cell) ?>">
+                  <?php echo htmlspecialchars($cell) ?>
+                </td>
+            <?php endif; ?>
+        <?php endforeach; ?>
+
+        <?php
+        // Lookup tags by server_group
+        $serverGroupIndex = array_search('Server Group', $headers);
+        $sg = $serverGroupIndex !== false ? $row[$serverGroupIndex] : '';
+        $rowTags = $tagsData[$sg] ?? [];
+	?>
 	<td>
-            <!-- The tag dropdown button will go here -->
-        </td>
+    	    <div class="tag-cell" 
+                data-sg="<?php echo htmlspecialchars($sg) ?>" 
+                data-tags="<?php echo htmlspecialchars(implode(';', $rowTags)) ?>">
+                <button class="tag-dropdown-btn" title="<?php echo htmlspecialchars(implode(';', $rowTags)) ?>">Tags ▾</button>
+    	    </div>
+	</td>
     </tr>
 <?php endforeach; ?>
 </tbody>
@@ -156,6 +191,42 @@ $('#run-parse').on('click', function() {
   }).always(function() {
     $('#run-parse').prop('disabled', false).text('✅ CSV File Generated');
   });
+});
+
+$(document).on('click', '.tag-dropdown-btn', function() {
+    var cell = $(this).closest('.tag-cell');
+    var sg = cell.data('sg');
+    var currentTags = [];
+    var tagsAttr = cell.data('tags');
+    if (tagsAttr) {
+        currentTags = tagsAttr.toString().split(';').filter(t => t.trim() !== '');
+    }
+    var newTags = prompt("Edit tags for "+sg+" (semicolon separated):", currentTags.join(";"));
+    if(newTags === null) return;
+
+    $.post('update_tags.php', { server_group: sg, tags: newTags }, function(res){
+	if(res.success){
+            $('.tag-cell[data-sg="'+sg+'"]').attr('data-tags', res.tags.join(';'));
+            $('.tag-cell[data-sg="'+sg+'"] .tag-dropdown-btn').attr('title', res.tags.join("; "));
+        }
+    }, 'json');
+});
+
+var activeTag = 'all';
+$.fn.dataTable.ext.search.push(function(settings, data, dataIndex){
+    if(activeTag==='all') return true;
+    var row = table.row(dataIndex).node();
+    var tags = $(row).find('.tag-cell').data('tags')?.toString().split(';') || [];
+    return tags.includes(activeTag);
+});
+
+$(document).on('click', '.filter-btn', function(){
+    $('.filter-btn').removeClass('active');
+    $(this).addClass('active');
+    activeTag = $(this).data('filter');
+    table.draw();
+});
+
 });
 </script>
 

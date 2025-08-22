@@ -1,5 +1,8 @@
 id,vuln_id,tags
 1,0000000000,internal;important;test_tag
-1,3f35ad39e6,0,0,0
-1,65cf285ee3,0,0,0
-1,fa8305aa74,0,0,0
+2,"Active Directory OKTE domain servers",internal
+3,"APS/DEV MGMT servers",important
+4,"Database servers (EDC)",internal
+5,"Active Directory IS domain servers",test;tag;3
+6,"Database servers (PMB)",temp
+7,XMTRADE-ZPE,temp
