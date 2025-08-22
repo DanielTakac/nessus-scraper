@@ -43,43 +43,38 @@ csvcut -c 1,3 "$INPUT_FILE" | tail -n +2 | while IFS=, read -r id link; do
   fragid=${fragment#\#}
   echo "Row $id ▶ fragment='$fragment' (fragid='$fragid')" >&2
 
-  # isolate section: from <div id="idN-container"> until the next vuln header <div xmlns="" id="idM" style="box-sizing
-  # … after you’ve computed file_path and fragid …
+  # … after computing file_path & fragid …
 
-  # 1) grab from idN-container to next idX-container (inclusive)
+  # 1) pull section from id="idN-container" down to the next vuln header
   section=$(
-    sed -n -E \
-      "/id=\"${fragid}-container\"/,/id=\"id[0-9]+-container\"/p" \
-      "$file_path" \
-    | sed '1d;$d'   # drop the start/end marker lines themselves
+    awk -v start="id=\"$fragid-container\"" \
+        -v endpat='^<div xmlns="" id="id[0-9]+"[^>]*style=' \
+    '
+      $0 ~ start     {flag=1; next}   # begin after the container marker
+      flag {
+        if ($0 ~ endpat) exit         # stop at next vuln header
+        print
+      }
+    ' "$file_path"
   )
 
-  # Debug: show us more of the section
-  echo "Row $id ▶ SECTION lines:" >&2
-  echo "$section" | sed -n '1,15p' >&2
+  echo "Row $id ▶ SECTION snippet:" >&2
+  echo "$section" | sed -n '1,12p' >&2
 
-  # ─────────────────────────────────────────────
-  # 1) Flatten the section into one line
-  flat_section=$(printf "%s" "$section" | tr '\n' ' ')
-
-  # 2) Extract CVSS v3.0 Base Score with sed
-  cvss=$(printf "%s" "$flat_section" \
-    | sed -nE 's#.*<div class="details-header">CVSS v3\.0 Base Score</div>[[:space:]]*<div[^>]*>\s*([^<]+)<.*#\1#p')
-
-  # Trim whitespace
-  cvss=${cvss##*( )}
-  cvss=${cvss%%*( )}
+  # 2) Flatten & extract CVSS with a single sed regex
+  flat=$(printf "%s" "$section" | tr "\n" " ")
+  cvss=$(printf "%s" "$flat" \
+    | sed -nE 's#.*CVSS v3\.0 Base Score</div>[[:space:]]*<div[^>]*>\s*([^<]+)<.*#\1#p' )
+  cvss=${cvss##*( )}; cvss=${cvss%%*( )}  # trim whitespace
 
   echo "Row $id ▶ extracted CVSS='$cvss'" >&2
-  # ─────────────────────────────────────────────
 
-  # Extract servers
+  # 3) Servers extraction stays the same
   servers=$(echo "$section" \
             | grep -oP '(?<=<h2>).*?(?=</h2>)' \
-            | paste -sd ';' -)
+            | paste -sd';' -)
   echo "Row $id ▶ extracted Servers='$servers'" >&2
 
-  # Print summary
   echo "Row $id: CVSS=$cvss | Servers=$servers"
 
 done

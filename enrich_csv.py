@@ -1,88 +1,105 @@
 #!/usr/bin/env python3
-import csv, os, sys
-from bs4 import BeautifulSoup
-import re
+import csv, os, sys, time
+from lxml import html
 
-# --- CONFIG ---
 INPUT_CSV   = sys.argv[1] if len(sys.argv)>1 else "critical.csv"
 OUTPUT_CSV  = sys.argv[2] if len(sys.argv)>2 else "enriched.csv"
 HOST_PREFIX = "nessus-reports.okte.sk"
-LOCAL_ROOT  = ".."   # relative path prefix to your /PLUGIN folder
+LOCAL_ROOT  = ".."
 
-# --- load input ---
+start = time.time()
+
+# 1) Load CSV rows
 with open(INPUT_CSV, newline='') as fin:
-    reader = csv.DictReader(fin)
-    rows   = list(reader)
-    fieldnames = reader.fieldnames + ["CVSS v3.0 Base Score", "Servers Affected"]
+    reader     = csv.DictReader(fin)
+    rows       = list(reader)
 
-# --- process each row ---
+    # start with whatever columns are in the file
+    orig = reader.fieldnames  
+
+    # only append these once
+    extras = []
+    for col in ["CVSS v3.0 Base Score","Servers Affected"]:
+        if col not in orig:
+            extras.append(col)
+
+    fieldnames = orig + extras
+
+# 2) Group rows by HTML file
+file_map = {}
 for row in rows:
+    link = row.get("Link","").strip()
+    if not link: continue
+    html_url, _, frag = link.partition('#')
+    path = html_url.replace(f"http://{HOST_PREFIX}", "") \
+                   .replace(f"https://{HOST_PREFIX}", "")
+    path = os.path.join(LOCAL_ROOT, path.lstrip("/"))
+    file_map.setdefault(path, []).append(frag or "")
+
+# 3) Parse each file once, extract all sections
+cache = {}  # cache[path] = { fragID: (cvss, servers) }
+for path, frags in file_map.items():
+    fragset = set(frags)
+    cache[path] = {}
+    if not os.path.isfile(path):
+        print(f"⚠️ missing: {path}", file=sys.stderr)
+        continue
+
+    # parse HTML with lxml
+    tree = html.parse(path)
+    root = tree.getroot()
+
+    # find all <div id="idN-container">
+    for container in root.xpath('//div[contains(@id,"-container")]'):
+        cid = container.get("id","")
+        if not cid.endswith("-container"): 
+            continue
+        frag = cid.rsplit("-",1)[0]  # "id2"
+        if frag not in fragset:
+            continue
+
+        # extract CVSS
+        cvss = ""
+        # find header, then next div sibling
+        hdrs = container.xpath('.//div[@class="details-header"]')
+        for h in hdrs:
+            txt = "".join(h.itertext()).strip()
+            if "CVSS v3.0 Base Score" in txt:
+                nxt = h.getnext()
+                if nxt is not None:
+                    cvss = "".join(nxt.itertext()).strip()
+                break
+
+        # extract servers (all <h2> text in this container)
+        servers = [s.strip() for s in container.xpath('.//h2/text()') if s.strip()]
+
+        cache[path][frag] = (cvss, ";".join(servers))
+
+# 4) Fill rows from cache
+for idx, row in enumerate(rows,1):
     link = row.get("Link","").strip()
     if not link:
         row["CVSS v3.0 Base Score"] = ""
-        row["Servers Affected"]      = ""
+        row["Servers Affected"] = ""
         continue
-
-    # build local path + fragment
-    # e.g. http://nessus-reports.okte.sk/PLUGIN/08/foo.html#id2
-    if "#" in link:
-        html_url, frag = link.split("#",1)
-        frag = frag.strip()
-    else:
-        html_url, frag = link, ""
-    # strip hostname, prepend LOCAL_ROOT
-    path = html_url.replace(f"http://{HOST_PREFIX}", "").replace(f"https://{HOST_PREFIX}", "")
+    html_url, _, frag = link.partition('#')
+    path = html_url.replace(f"http://{HOST_PREFIX}", "") \
+                   .replace(f"https://{HOST_PREFIX}", "")
     path = os.path.join(LOCAL_ROOT, path.lstrip("/"))
-    if not os.path.isfile(path):
-        print(f"⚠️  Warning: file not found: {path}", file=sys.stderr)
-        row["CVSS v3.0 Base Score"] = ""
-        row["Servers Affected"]      = ""
-        continue
+    val = cache.get(path,{}).get(frag,("", ""))
+    row["CVSS v3.0 Base Score"], row["Servers Affected"] = val
 
-    # parse HTML
-    soup = BeautifulSoup(open(path, encoding="utf-8"), "lxml")
+    # progress every 50 rows
+    if idx % 50 == 0 or idx == len(rows):
+        print(f"Processed {idx}/{len(rows)} rows in {time.time()-start:.1f}s", 
+              file=sys.stderr)
 
-    # narrow to the single vuln section if frag present
-    section = soup
-    if frag:
-        # find the container div for this frag
-        container = soup.find(id=f"{frag}-container")
-        if container:
-            # we will search *inside* container only
-            section = container
-        else:
-            print(f"⚠️  Can't find container for #{frag} in {path}", file=sys.stderr)
-
-    # --- extract CVSS v3.0 Base Score ---
-    cvss_val = ""
-    # find all headers, pick the one containing our label
-    for hdr in section.find_all("div", class_="details-header"):
-        text = hdr.get_text(separator=" ", strip=True)
-        if "CVSS v3.0 Base Score" in text:
-            # next sibling div holds the score
-            nxt = hdr.find_next_sibling("div")
-            if nxt:
-                cvss_val = nxt.get_text(strip=True)
-            break
-    row["CVSS v3.0 Base Score"] = cvss_val
-    print(f"Row {row.get('id')} → CVSS='{cvss_val}'", file=sys.stderr)
-
-    # --- extract Servers Affected (Plugin Output host list) ---
-    servers = []
-    # The "Plugin Output" block often has <h2>hostname ...</h2>
-    # so we gather all <h2> under this section
-    for h2 in section.find_all("h2"):
-        servers.append(h2.get_text(strip=True))
-    row["Servers Affected"] = ";".join(servers)
-
-    print(f"Row {row.get('id')} → CVSS='{cvss_val}', Servers={len(servers)} hosts", file=sys.stderr)
-
-# --- write enriched CSV ---
+# 5) Write enriched CSV
 with open(OUTPUT_CSV, "w", newline='') as fout:
     writer = csv.DictWriter(fout, fieldnames=fieldnames)
     writer.writeheader()
-    for row in rows:
-        writer.writerow(row)
+    writer.writerows(rows)
 
-print(f"Done: wrote {len(rows)} rows to {OUTPUT_CSV}", file=sys.stderr)
+print(f"Done {len(rows)} rows, total time {time.time()-start:.1f}s", 
+      file=sys.stderr)
 

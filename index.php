@@ -169,7 +169,9 @@ $(document).ready(function() {
             [10, 25, 50, 100, -1],
             [10, 25, 50, 100, "All"]
         ],
-        columnDefs: [{ targets: [-3, -2, -1], visible: false, searchable: false }],
+        columnDefs: [
+		{ targets: [-3, -2, -1], visible: false, searchable: false }
+	],
 
         // 👉 Use per-file storage key
         stateSaveCallback: function(settings, data) {
@@ -205,12 +207,12 @@ $(document).ready(function() {
     var activeFilter = 'all';
 
 $('#run-parse').on('click', function() {
-  $(this).prop('disabled', true).text('⏳ Generating…');
+  $(this).prop('disabled', true).text('⏳ Generating… (~30 seconds)');
 
   $.get('run_parser.php', function(res) {
-    if (res.message !== "CSV generated successfully") {
-      alert(res.message);
-    }
+    // if (res.message !== "CSV generated successfully") {
+      // alert(res.message);
+    // }
     console.log(res.output); // see server logs in console
     location.reload(); // refresh to show new CSVs
   }, 'json').fail(function() {
