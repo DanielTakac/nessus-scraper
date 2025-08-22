@@ -101,7 +101,7 @@ foreach($allTags as $t){
 <?php foreach ($data as $row): ?>
     <tr>
         <?php foreach ($row as $colIdx => $cell): ?>
-            <?php if ($colIdx === 3): // Example: 4th column is a link ?>
+            <?php if ($colIdx === 2): // Example: 3rd column is a link ?>
                 <td class="link-cell" title="<?php echo htmlspecialchars($cell) ?>">
                   <a href="<?php echo htmlspecialchars($cell) ?>"
                      target="_blank"
@@ -133,6 +133,9 @@ foreach($allTags as $t){
 <?php endforeach; ?>
 </tbody>
     </table>
+</div>
+<div id="sumDisplay" style="margin:15px; font-weight:bold;">
+    Sum: 0
 </div>
 
 <!-- jQuery -->
@@ -178,6 +181,26 @@ $(document).ready(function() {
         }
     });
 
+        table.on('draw', function () {
+        // Get data from currently filtered rows (column 0)
+        var data = table.column(5, { search: 'applied' }).data();
+
+        var sum = 0;
+        data.each(function (val) {
+            // Match first number inside parentheses: (123)
+            var match = val.toString().match(/\((\d+)\)/);
+            if (match) {
+                var num = parseInt(match[1], 10);
+                if (!isNaN(num)) sum += num;
+            }
+        });
+
+        $('#sumDisplay').text('Sum: ' + sum.toLocaleString());
+        });
+
+    // Trigger once on start
+    table.draw();
+
     // Keep track of active filter
     var activeFilter = 'all';
 
@@ -197,39 +220,88 @@ $('#run-parse').on('click', function() {
   });
 });
 
+// Keep references
+var modal = $('#tagModal');
+var overlay = $('#tagOverlay');
+var currentSg = null;
+
+// Open modal
 $(document).on('click', '.tag-dropdown-btn', function() {
     var cell = $(this).closest('.tag-cell');
-    var sg = cell.data('sg');
-    var currentTags = [];
-    var tagsAttr = cell.data('tags');
-    if (tagsAttr) {
-        currentTags = tagsAttr.toString().split(';').filter(t => t.trim() !== '');
-    }
-    var newTags = prompt("Edit tags for "+sg+" (semicolon separated):", currentTags.join(";"));
-    if(newTags === null) return;
+    currentSg = cell.data('sg');
 
-    $.post('update_tags.php', { server_group: sg, tags: newTags }, function(res){
-	if(res.success){
-            $('.tag-cell[data-sg="'+sg+'"]').attr('data-tags', res.tags.join(';'));
-            $('.tag-cell[data-sg="'+sg+'"] .tag-dropdown-btn').attr('title', res.tags.join("; "));
-        }
-    }, 'json');
+    // Current tags from data-tags
+    var tagsAttr = cell.attr('data-tags');
+    var currentTags = tagsAttr ? tagsAttr.toString().split(';').filter(t => t.trim() !== '') : [];
+
+    // Populate modal
+    $('#modalSgLabel').text(currentSg);
+    $('#tagInput').val(currentTags.join(';'));
+
+    // Show modal + overlay + focus on the input
+    overlay.addClass('active');
+    modal.addClass('active');
+
+    setTimeout(function(){
+        var $input = $('#tagInput');
+        $input.focus();
+        $input[0].select();
+    }, 100);
 });
 
+// Close modal helper
+function closeModal(){
+    overlay.removeClass('active');
+    modal.removeClass('active');
+    currentSg = null;
+}
+
+// Cancel button
+$('#cancelTags, #tagOverlay').on('click', function(){
+    closeModal();
+});
+
+// Save button
+$('#saveTags').on('click', function(){
+    var newTags = $('#tagInput').val();
+    if(currentSg===null) return;
+    $.post('update_tags.php', { server_group: currentSg, tags: newTags }, function(res){
+	if(res.success){
+            // Update all same server_group rows
+            $('.tag-cell[data-sg="'+currentSg+'"]').each(function(){
+                $(this).attr('data-tags', res.tags.join(';'));
+                $(this).find('.tag-dropdown-btn')
+                       .attr('title', res.tags.join("; "));
+            });
+
+            // Ensure filter buttons exist for new tags
+            res.tags.forEach(function(t){
+                t = t.trim();
+                if(!t) return;
+                if($('.filter-btn[data-filter="'+t+'"]').length === 0){
+                    // Add new filter button before the "Show All" one
+                    $('<button class="filter-btn" data-filter="'+t+'">'+t+'</button>')
+                        .insertBefore('.filter-btn[data-filter="all"]');
+                }
+            });
+
+            table.rows().invalidate().draw();
+        }
+        closeModal();
+    },'json');
+});
 var activeTags = []; // <-- keep track of selected tags
 var matchMode = 'ALL'; // default
 
 $.fn.dataTable.ext.search.push(function(settings, data, dataIndex){
     if(activeTags.length === 0) return true; // no filters = show all
     var row = table.row(dataIndex).node();
-    var tagsAttr = $(row).find('.tag-cell').data('tags');
+    var tagsAttr = $(row).find('.tag-cell').attr('data-tags');
     var rowTags = tagsAttr ? tagsAttr.toString().split(';').map(t=>t.trim()) : [];
 
     if(matchMode === 'ALL') {
-        // Row must have *all* selected tags
         return activeTags.every(tag => rowTags.includes(tag));
     } else { // ANY
-        // Row must have *at least one* selected tag
         return activeTags.some(tag => rowTags.includes(tag));
     }
 });
@@ -268,9 +340,35 @@ $('#mode-switch').on('click', function(){
     table.draw();
 });
 
+// Save tags when pressing Enter in the input
+$('#tagInput').on('keypress', function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();          // prevent form/line breaks
+        $('#saveTags').click();      // trigger save button click
+    }
+});
+
+// Shortcut: Esc to Cancel/Close
+$(document).on('keydown', function(e) {
+    if (e.key === "Escape" && modal.hasClass('active')) {
+        e.preventDefault();
+        closeModal();   // call your helper
+    }
+});
+
 });
 </script>
-
+<!-- Tag Edit Modal -->
+<div id="tagOverlay" class="overlay"></div>
+<div id="tagModal" class="modal">
+  <h3>Edit Tags</h3>
+  <p id="modalSgLabel"></p>
+  <input type="text" id="tagInput" placeholder="semicolon separated tags">
+  <div class="modal-actions">
+    <button id="saveTags" class="modal-btn save">Save</button>
+    <button id="cancelTags" class="modal-btn cancel">Cancel</button>
+  </div>
+</div>
 </body>
 <footer class="site-footer">
     <p>🔒 Nessus Scraper &copy; <?php echo date("Y"); ?> Daniel Takáč</p>
