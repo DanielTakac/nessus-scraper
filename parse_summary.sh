@@ -10,7 +10,7 @@ OUTPUT_FILE=${2:-summary.csv}
 rm $OUTPUT_FILE
 
 # Print header
-printf 'id,vuln_id,Server Group,Link,CVSS v3.0 Base Score,Servers Affected,Vulnerability\n' > "$OUTPUT_FILE"
+printf 'id,Server Group,Link,CVSS v3.0 Base Score,Servers Affected,Vulnerability\n' > "$OUTPUT_FILE"
 
 current_group=""
 row_id=0
@@ -41,17 +41,11 @@ while IFS= read -r line; do
       | sed -E 's/.*href="[^"]*"[^>]*>([^<]+)<.*/\1/' \
       | sed -E 's/^[[:space:]]+//;s/[[:space:]]+$//')
 
-    # Build string to hash
-    to_hash="${current_group}|${link}|${vuln}"
-    hash=$(echo -n "$to_hash" | sha1sum | cut -c1-10)
-
-    vuln_id="${hash}"
-
     row_id=$((row_id+1))
 
     # emit CSV row, quoting fields
-    printf '"%d","%s","%s","%s","%s","%s","%s"\n' \
-      "$row_id" "$vuln_id" "$current_group" "$link" "" "" "$vuln" \
+    printf '"%d","%s","%s","%s","%s","%s"\n' \
+      "$row_id" "$current_group" "$link" "" "" "$vuln" \
       >> "$OUTPUT_FILE"
   fi
 

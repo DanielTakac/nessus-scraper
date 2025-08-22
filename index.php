@@ -62,7 +62,7 @@ if (file_exists($tagsFile) && ($h = fopen($tagsFile, "r")) !== false) {
         </select>
     </form>
 </div>
-<div id="report-time" style="margin-left:50px;">
+<div id="report-time" style="text-align:center;">
     <?php
         $filename = 'time.html';
         if (file_exists($filename)) {
@@ -72,7 +72,12 @@ if (file_exists($tagsFile) && ($h = fopen($tagsFile, "r")) !== false) {
         }
     ?>
 </div>
+<div class="tag-filter-mode">
+    <label>Tag Filter Mode:</label>
+    <button id="mode-switch" class="mode-btn" data-mode="ALL">AND</button>
+</div>
 <div class="tag-filters">
+<button class="filter-btn" data-filter="all">Show All</button>
 <?php
 $allTags = [];
 foreach($tagsData as $sg=>$tg) $allTags = array_merge($allTags,$tg);
@@ -81,7 +86,6 @@ foreach($allTags as $t){
     echo '<button class="filter-btn" data-filter="'.htmlspecialchars($t).'">'.htmlspecialchars($t).'</button>';
 }
 ?>
-<button class="filter-btn" data-filter="all">Show All</button>
 </div>
 <div class="container">
     <table id="myTable" class="display nowrap stripe hover" style="width:100%">
@@ -212,18 +216,55 @@ $(document).on('click', '.tag-dropdown-btn', function() {
     }, 'json');
 });
 
-var activeTag = 'all';
+var activeTags = []; // <-- keep track of selected tags
+var matchMode = 'ALL'; // default
+
 $.fn.dataTable.ext.search.push(function(settings, data, dataIndex){
-    if(activeTag==='all') return true;
+    if(activeTags.length === 0) return true; // no filters = show all
     var row = table.row(dataIndex).node();
-    var tags = $(row).find('.tag-cell').data('tags')?.toString().split(';') || [];
-    return tags.includes(activeTag);
+    var tagsAttr = $(row).find('.tag-cell').data('tags');
+    var rowTags = tagsAttr ? tagsAttr.toString().split(';').map(t=>t.trim()) : [];
+
+    if(matchMode === 'ALL') {
+        // Row must have *all* selected tags
+        return activeTags.every(tag => rowTags.includes(tag));
+    } else { // ANY
+        // Row must have *at least one* selected tag
+        return activeTags.some(tag => rowTags.includes(tag));
+    }
 });
 
+// Toggle tag filters (same as before)
 $(document).on('click', '.filter-btn', function(){
-    $('.filter-btn').removeClass('active');
-    $(this).addClass('active');
-    activeTag = $(this).data('filter');
+    var tag = $(this).data('filter');
+
+    if(tag === 'all') {
+        activeTags = [];
+        $('.filter-btn').removeClass('active');
+        $(this).addClass('active');
+    } else {
+        $(this).toggleClass('active');
+        $('.filter-btn[data-filter="all"]').removeClass('active');
+
+        if($(this).hasClass('active')) {
+            if(!activeTags.includes(tag)) activeTags.push(tag);
+        } else {
+            activeTags = activeTags.filter(t => t !== tag);
+        }
+    }
+
+    table.draw();
+});
+
+// Mode switch between ALL/ANY
+$('#mode-switch').on('click', function(){
+    if(matchMode === 'ALL') {
+        matchMode = 'ANY';
+        $(this).text('OR').attr('data-mode','ANY');
+    } else {
+        matchMode = 'ALL';
+        $(this).text('AND').attr('data-mode','ALL');
+    }
     table.draw();
 });
 
