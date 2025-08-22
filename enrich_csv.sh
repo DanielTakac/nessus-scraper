@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 #
-# Enrich CSV: read each row of summary.csv
-# map "Link" column -> local HTML file path
+# Enrich CSV: safe CSV parser using csvkit
 #
 
-INPUT_FILE=${1:-summary.csv}
+INPUT_FILE=${1:-critical.csv}
 OUTPUT_FILE=${2:-enriched.csv}
 
 if [[ ! -f "$INPUT_FILE" ]]; then
@@ -14,29 +13,34 @@ fi
 
 echo "Processing $INPUT_FILE …"
 
-# Copy the original into OUTPUT – later we will enrich it
 cp "$INPUT_FILE" "$OUTPUT_FILE"
 
-# Extract just id (col1) + link (col4), skip header
-csvcut -c 1,4 "$INPUT_FILE" | tail -n +2 | \
-while IFS=, read -r id link; do
-  # Strip quotes
-  id="${id%\"}"; id="${id#\"}"
-  link="${link%\"}"; link="${link#\"}"
+# Use csvcut to pull out id + link, which are col 1 and 3
+csvcut -c 1,3 "$INPUT_FILE" | tail -n +2 | while IFS=, read -r id link; do
+  id=${id#\"}; id=${id%\"}
+  link=${link#\"}; link=${link%\"}
 
-  # If empty, skip
-  if [[ -z "$link" ]]; then
-    continue
-  fi
+  file_path=$(echo "$link" | sed -E 's#https?://nessus-reports\.okte\.sk#/..#')
+  file_path=$(echo "$file_path" | sed -E 's/(.html).*/\1/')
+  fragment=$(echo "$link" | sed -n 's/.*\(#id[0-9]\+\).*/\1/p')
+  fragid=${fragment#\#}   # "id2"
 
-  # Replace hostname with ..
-  local_path="${link/https:\/\/nessus-reports.okte.sk/..}"
-  local_path="${local_path/http:\/\/nessus-reports.okte.sk/..}"
+  # FIX: remove accidental leading slash
+  file_path=${file_path#/}
 
-  # Trim after .html
-  local_path=$(echo "$local_path" | sed -E 's/(\.html).*/\1/')
+  # isolate section: from <div id="idN-container"> until next "idN+1"
+  section=$(awk -v start="id=\"$fragid-container\"" -v idpat="id=\"id[0-9]+\"" '
+    $0 ~ start {flag=1}
+    flag {print}
+    $0 ~ idpat && $0 !~ start && flag {exit}
+  ' "$file_path")
 
-  # Debug output
-  echo "Row $id: $link -> $local_path"
+  # CVSS score: line after "CVSS v3.0 Base Score"
+  cvss=$(echo "$section" | awk '/CVSS v3\.0 Base Score/{getline; print}' | sed -E 's/<[^>]+>//g' | xargs)
 
+  # Servers: all <h2>…</h2>
+  servers=$(echo "$section" | grep -oP '(?<=<h2>).*?(?=</h2>)' | paste -sd ';' -)
+
+  echo "Row $id: CVSS=$cvss | Servers=$servers"
 done
+
