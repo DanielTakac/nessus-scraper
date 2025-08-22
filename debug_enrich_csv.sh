@@ -43,26 +43,35 @@ csvcut -c 1,3 "$INPUT_FILE" | tail -n +2 | while IFS=, read -r id link; do
   fragid=${fragment#\#}
   echo "Row $id ▶ fragment='$fragment' (fragid='$fragid')" >&2
 
-  section=$(awk -v start="id=\"$fragid-container\"" \
-                 -v nextid="id=\"id[0-9]+-container\"" '
-      $0 ~ start {flag=1}
-      flag {print}
-      $0 ~ nextid && $0 !~ start && flag {exit}
-  ' "$file_path")
+  # isolate section: from <div id="idN-container"> until the next vuln header <div xmlns="" id="idM" style="box-sizing
+  # … after you’ve computed file_path and fragid …
 
-  if [[ -z "$section" ]]; then
-    echo "‼️ WARNING: extracted SECTION is empty!" >&2
-  else
-    echo "Row $id ▶ SECTION preview:" >&2
-    echo "$section" | head -n 5 >&2
-  fi
+  # 1) grab from idN-container to next idX-container (inclusive)
+  section=$(
+    sed -n -E \
+      "/id=\"${fragid}-container\"/,/id=\"id[0-9]+-container\"/p" \
+      "$file_path" \
+    | sed '1d;$d'   # drop the start/end marker lines themselves
+  )
 
-  # Extract CVSS score
-  cvss=$(echo "$section" \
-         | awk '/CVSS v3\.0 Base Score/{getline; print}' \
-         | sed -E 's/<[^>]+>//g' \
-         | xargs)
+  # Debug: show us more of the section
+  echo "Row $id ▶ SECTION lines:" >&2
+  echo "$section" | sed -n '1,15p' >&2
+
+  # ─────────────────────────────────────────────
+  # 1) Flatten the section into one line
+  flat_section=$(printf "%s" "$section" | tr '\n' ' ')
+
+  # 2) Extract CVSS v3.0 Base Score with sed
+  cvss=$(printf "%s" "$flat_section" \
+    | sed -nE 's#.*<div class="details-header">CVSS v3\.0 Base Score</div>[[:space:]]*<div[^>]*>\s*([^<]+)<.*#\1#p')
+
+  # Trim whitespace
+  cvss=${cvss##*( )}
+  cvss=${cvss%%*( )}
+
   echo "Row $id ▶ extracted CVSS='$cvss'" >&2
+  # ─────────────────────────────────────────────
 
   # Extract servers
   servers=$(echo "$section" \
