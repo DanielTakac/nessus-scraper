@@ -5,16 +5,6 @@ body {
             background: #f4f6f9;
         }
 
-        h2 {
-            text-align: center;
-            padding: 20px;
-            margin: 0;
-            background: #3949ab;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        }
-
         .container {
             padding-left: 30px;
             padding-right: 30px;

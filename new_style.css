@@ -219,4 +219,52 @@
     filter: brightness(0) saturate(100%) invert(74%) sepia(82%) saturate(1487%) hue-rotate(360deg) brightness(103%) contrast(101%);
 }
 
+/* Header container */
+.header-bar {
+    display: flex;
+    justify-content: space-between; /* spread out left/center/right */
+    align-items: center;
+    background: #3949ab;   /* same as your theme */
+    color: white;
+    padding: 10px 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Left = title */
+.header-bar .title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Middle = file picker */
+.header-bar .file-picker {
+    flex: 1;                     /* fill remaining space */
+    text-align: center;          /* center inside */
+}
+
+/* Right = refresh button */
+.header-bar .header-actions {
+    text-align: right;
+}
+
+/* Adjust child elements inside header */
+.header-bar select {
+    padding: 5px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.header-bar button {
+    background: #e09a02;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+.header-bar button:hover {
+    background: #f5ac0f;
+}
 

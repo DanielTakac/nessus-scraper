@@ -58,11 +58,10 @@ if (file_exists($extFile) && ($h = fopen($extFile,'r'))) {
 </head>
 <body>
 
-<h2>📝 Nessus Scraper<!-- - <b>"Vycucávač"--></b></h2>
-<div style="text-align:center; margin:15px;">
-    <button id="run-parse" class="btn-run-parse">🔄 Refresh Nessus Report</button>
-</div>
-<div class="file-picker" style="text-align:center; margin:15px 0;">
+<div class="header-bar">
+  <h2 class="title">📝 Nessus Scraper</h2>
+
+  <div class="file-picker">
     <form method="get">
         <label for="file">📂 Choose CSV File:</label>
         <select id="file" name="file" onchange="this.form.submit()">
@@ -74,6 +73,11 @@ if (file_exists($extFile) && ($h = fopen($extFile,'r'))) {
             <?php endforeach; ?>
         </select>
     </form>
+  </div>
+
+  <div class="header-actions">
+    <button id="run-parse" class="btn-run-parse">🔄 Refresh Nessus Report</button>
+  </div>
 </div>
 <div id="report-time" style="text-align:center;">
     <?php
