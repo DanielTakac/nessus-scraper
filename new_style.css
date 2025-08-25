@@ -172,3 +172,51 @@
   max-width: 30px;
 }
 
+.site-footer {
+    text-align: center;
+    padding: 15px;
+    background: #3949ab;
+    color: white;
+    font-size: 14px;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.15);
+}
+
+.site-footer p {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+/* GitHub link style */
+.github-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 500;
+    margin-left: 6px;
+    transition: color 0.3s;
+}
+
+.github-link:hover {
+    color: #ffd54f; /* goldish hover */
+}
+
+/* PNG GitHub icon */
+.github-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    vertical-align: middle;
+
+    filter: brightness(0) invert(1);       /* White on dark footer */
+    transition: filter 0.3s ease;
+}
+
+.github-link:hover .github-icon {
+    filter: brightness(0) saturate(100%) invert(74%) sepia(82%) saturate(1487%) hue-rotate(360deg) brightness(103%) contrast(101%);
+}
+
+

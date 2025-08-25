@@ -410,6 +410,12 @@ $(document).on('keydown', function(e) {
 </div>
 </body>
 <footer class="site-footer">
-    <p>🔒 Nessus Scraper &copy; <?php echo date("Y"); ?> Daniel Takáč</p>
+    <p>
+        🔒 Nessus Scraper &copy; <?php echo date("Y"); ?> Daniel Takáč
+        <a href="https://github.com/DanielTakac/nessus-scraper/" target="_blank" class="github-link">
+            <img src="./img/github.png" alt="GitHub" class="github-icon">
+            GitHub
+        </a>
+    </p>
 </footer>
 </html>
