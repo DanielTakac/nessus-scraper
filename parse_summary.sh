@@ -10,7 +10,7 @@ OUTPUT_FILE=${2:-summary.csv}
 rm $OUTPUT_FILE
 
 # Print header
-printf 'id,Server Group,Link,CVSS v3.0 Base Score,Servers Affected,Vulnerability\n' > "$OUTPUT_FILE"
+printf 'id,Server Group,Link,CVSS v3.0,Servers Affected,Vulnerability\n' > "$OUTPUT_FILE"
 
 current_group=""
 row_id=0

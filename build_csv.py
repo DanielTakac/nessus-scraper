@@ -102,10 +102,10 @@ with open(EXT_CSV, "w", newline='') as fout:
         })
 
         # 2) trim the original CVSS field to numeric only
-        full = r.get("CVSS v3.0 Base Score","").strip()
+        full = r.get("CVSS v3.0","").strip()
         # take up to first space or parenthesis
         short = full.split()[0] if full else ""
-        r["CVSS v3.0 Base Score"] = short
+        r["CVSS v3.0"] = short
 
 # Overwrite the input CSV with trimmed CVSS
 with open(INPUT_CSV, "w", newline='') as fout:

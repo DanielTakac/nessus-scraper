@@ -146,3 +146,29 @@
 }
 .modal-btn:hover { opacity: 0.9; }
 
+/* target nth column (index starts at 1) */
+#myTable th:nth-child(1),
+#myTable td:nth-child(1) {
+  width: 5px;
+}
+
+#myTable th:nth-child(2),
+#myTable td:nth-child(2) {
+  max-width: 240px;
+}
+
+#myTable th:nth-child(3),
+#myTable td:nth-child(3) {
+  max-width: 30px;
+}
+
+#myTable th:nth-child(4),
+#myTable td:nth-child(4) {
+  max-width: 55px;
+}
+
+#myTable th:nth-child(7),
+#myTable td:nth-child(7) {
+  max-width: 30px;
+}
+

@@ -19,7 +19,7 @@ with open(INPUT_CSV, newline='') as fin:
 
     # only append these once
     extras = []
-    for col in ["CVSS v3.0 Base Score","Servers Affected"]:
+    for col in ["CVSS v3.0","Servers Affected"]:
         if col not in orig:
             extras.append(col)
 
@@ -79,7 +79,7 @@ for path, frags in file_map.items():
 for idx, row in enumerate(rows,1):
     link = row.get("Link","").strip()
     if not link:
-        row["CVSS v3.0 Base Score"] = ""
+        row["CVSS v3.0"] = ""
         row["Servers Affected"] = ""
         continue
     html_url, _, frag = link.partition('#')
@@ -87,7 +87,7 @@ for idx, row in enumerate(rows,1):
                    .replace(f"https://{HOST_PREFIX}", "")
     path = os.path.join(LOCAL_ROOT, path.lstrip("/"))
     val = cache.get(path,{}).get(frag,("", ""))
-    row["CVSS v3.0 Base Score"], row["Servers Affected"] = val
+    row["CVSS v3.0"], row["Servers Affected"] = val
 
     # progress every 50 rows
     if idx % 50 == 0 or idx == len(rows):
