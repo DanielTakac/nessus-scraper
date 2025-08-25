@@ -210,9 +210,6 @@ $(document).ready(function() {
             [10, 25, 50, 100, -1],
             [10, 25, 50, 100, "All"]
         ],
-        columnDefs: [
-		{ targets: [-3, -2, -1], visible: false, searchable: false }
-	],
 
         // 👉 Use per-file storage key
         stateSaveCallback: function(settings, data) {
