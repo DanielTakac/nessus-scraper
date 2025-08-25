@@ -89,6 +89,9 @@ if (file_exists($extFile) && ($h = fopen($extFile,'r'))) {
         }
     ?>
 </div>
+<div id="sumDisplay" style="text-align:center;">
+    Total vulnerabilities found: 0
+</div>
 <div class="tag-filter-mode">
     <label>Tag Filter Mode:</label>
     <button id="mode-switch" class="mode-btn" data-mode="ALL">AND</button>
@@ -174,9 +177,6 @@ $vulnIndex  = array_search('Vulnerability', $headers, true);
 <?php endforeach; ?>
 </tbody>
     </table>
-<div id="sumDisplay">
-    Total vulnerabilities found: 0
-</div>
 </div>
 
 <!-- jQuery -->
