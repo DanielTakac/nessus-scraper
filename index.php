@@ -28,6 +28,19 @@ if (file_exists($tagsFile) && ($h = fopen($tagsFile, "r")) !== false) {
     }
     fclose($h);
 }
+
+// Load extended info
+$extFile = 'ext/' . pathinfo($currentFile, PATHINFO_FILENAME) . '_extended.csv';
+$extended = [];
+if (file_exists($extFile) && ($h = fopen($extFile,'r'))) {
+  $hdr = fgetcsv($h);
+  while ($r = fgetcsv($h)) {
+    $rowA = array_combine($hdr, $r);
+    // index by the same "id" column you already have in your data.csv
+    $extended[ $rowA['id'] ] = $rowA;
+  }
+  fclose($h);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -98,6 +111,11 @@ foreach($allTags as $t){
         </tr>
         </thead>
 <tbody>
+<?php
+$idIndex    = array_search('id', $headers, true);
+$cvssIndex  = array_search('CVSS v3.0', $headers, true);
+$vulnIndex  = array_search('Vulnerability', $headers, true);
+?>
 <?php foreach ($data as $row): ?>
     <tr>
         <?php foreach ($row as $colIdx => $cell): ?>
@@ -109,6 +127,25 @@ foreach($allTags as $t){
                     🔗 Link
                   </a>
                 </td>
+            <?php elseif ($colIdx === $cvssIndex): 
+        // CVSS short in cell, full CVSS in tooltip
+        $rowId  = $row[$idIndex];
+        $ext    = $extended[$rowId] ?? ['cvss_base_full'=>''];
+        $tip    = $ext['cvss_base_full'];
+  ?>
+      <td title="<?php echo htmlspecialchars($tip); ?>">
+        <?php echo htmlspecialchars($cell); ?>
+      </td>
+
+  <?php elseif ($colIdx === $vulnIndex): 
+        // Vulnerability short in cell, description in tooltip
+        $rowId  = $row[$idIndex];
+        $ext    = $extended[$rowId] ?? ['description'=>''];
+        $tip    = $ext['description'];
+  ?>
+      <td title="<?php echo htmlspecialchars($tip); ?>">
+        <?php echo htmlspecialchars($cell); ?>
+      </td>
             <?php else: ?>
                 <td title="<?php echo htmlspecialchars($cell) ?>">
                   <?php echo htmlspecialchars($cell) ?>

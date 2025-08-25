@@ -1,7 +1,7 @@
 id,vuln_id,tags
 1,0000000000,internal;external
-2,"Active Directory IS domain servers",y
+2,"Active Directory IS domain servers",
 3,"Active Directory OKTE domain servers",
 4,"Database servers (EDC)",
-5,"APS/DEV MGMT servers",z
-6,"EDC PROD servers",x
+5,"APS/DEV MGMT servers",
+6,"EDC PROD servers",
