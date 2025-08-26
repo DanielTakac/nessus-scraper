@@ -268,3 +268,12 @@
     background: #f5ac0f;
 }
 
+.dataTables-searchPanes {
+  margin-bottom: 10px;
+}
+.dataTables-searchPanes .dtsp-pane {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+

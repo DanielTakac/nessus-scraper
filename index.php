@@ -55,6 +55,12 @@ if (file_exists($extFile) && ($h = fopen($extFile,'r'))) {
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="new_style.css">
 
+    <!-- SearchPanes CSS -->
+    <link rel="stylesheet"
+      href="https://cdn.datatables.net/searchpanes/2.2.0/css/searchPanes.dataTables.min.css"/>
+    <link rel="stylesheet"
+      href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css"/>
+
 </head>
 <body>
 
@@ -192,13 +198,17 @@ $vulnIndex  = array_search('Vulnerability', $headers, true);
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 
+<!-- DataTables SearchPanes & Select JS -->
+<script src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+
 <script>
 $(document).ready(function() {
     // PHP variable output so JS knows which file is currently active
     var currentFile = "<?php echo $currentFile; ?>";
 
     var table = $('#myTable').DataTable({
-        dom: 'Bfrtip',
+        dom: 'PBfrtip',
         buttons: ['colvis','pageLength','copy','csv','excel','pdf'],
         responsive: true,
         paging: true,
@@ -218,7 +228,29 @@ $(document).ready(function() {
         stateLoadCallback: function(settings) {
             var data = localStorage.getItem('DataTables_' + currentFile);
             return data ? JSON.parse(data) : null;
+        },
+
+        searchPanes: {
+            cascadePanes: true,      // when you pick in one pane it filters the others
+            viewTotal: true,         // show counts of matching records
+            layout: 'columns-3'      // how many panes per row
+        },
+
+        // tell which columns get panes
+        columnDefs: [
+        {
+            searchPanes: {
+                show: true
+            },
+            targets: [1,3,5]    // zero-based indexes of columns that will have search panes
+        },
+        {
+            searchPanes: {
+                show: false
+            },
+            targets: [0,2,4,6]
         }
+        ]
     });
 
         table.on('draw', function () {
@@ -397,6 +429,7 @@ $(document).on('keydown', function(e) {
 });
 
 });
+
 </script>
 <!-- Tag Edit Modal -->
 <div id="tagOverlay" class="overlay"></div>
