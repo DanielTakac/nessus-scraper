@@ -199,7 +199,7 @@ $(document).ready(function() {
 
     var table = $('#myTable').DataTable({
         dom: 'Bfrtip',
-        buttons: ['colvis','pageLength','colvisRestore','copy','csv','excel','pdf'],
+        buttons: ['colvis','pageLength','copy','csv','excel','pdf'],
         responsive: true,
         paging: true,
         searching: true,
