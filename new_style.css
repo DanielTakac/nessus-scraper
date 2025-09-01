@@ -277,3 +277,32 @@
   overflow: hidden;
 }
 
+#fancy-link {
+      color: #1a73e8;              /* blue link color */
+      text-decoration: none;       /* remove default underline */
+      font-size: 1.2em;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+
+    #fancy-link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 100%;
+      height: 2px;
+      background: #1a73e8;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease;
+    }
+
+    #fancy-link:hover {
+      color: #174ea6;  /* darker shade on hover */
+    }
+
+    #fancy-link:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }

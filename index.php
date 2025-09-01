@@ -95,6 +95,11 @@ if (file_exists($extFile) && ($h = fopen($extFile,'r'))) {
         }
     ?>
 </div>
+<div style="text-align:center;margin-bottom:10px;">
+   <a id="fancy-link" href="https://nessus-reports.okte.sk/R/summary.html" target="_blank" rel="noopener noreferrer">
+       Link to original Nessus reports website
+   </a>
+</div>
 <div id="sumDisplay" style="text-align:center;">
     Total vulnerabilities found: 0
 </div>
