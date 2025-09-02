@@ -101,7 +101,7 @@ if (file_exists($extFile) && ($h = fopen($extFile,'r'))) {
    </a>
 </div>
 <div id="sumDisplay" style="text-align:center;">
-    Total vulnerabilities found: 0
+    Total vulnerabilities affecting servers: 0
 </div>
 <div class="tag-filter-mode">
     <label>Tag Filter Mode:</label>
@@ -272,7 +272,7 @@ $(document).ready(function() {
             }
         });
 
-        $('#sumDisplay').text('Total vulnerabilities found: ' + sum.toLocaleString());
+        $('#sumDisplay').text('Total vulnerabilities affecting servers: ' + sum.toLocaleString());
         });
 
     // Trigger once on start
