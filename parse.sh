@@ -18,3 +18,6 @@ python3 enrich_csv.py high.csv high.csv
 python3 build_csv.py critical.csv
 python3 build_csv.py high.csv
 
+./clean_csv.sh critical.csv
+./clean_csv.sh high.csv
+
