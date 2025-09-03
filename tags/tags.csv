@@ -1,7 +1,57 @@
 id,vuln_id,tags
 1,0000000000,internal;external
-2,"Active Directory IS domain servers",
-3,"Active Directory OKTE domain servers",
-4,"Database servers (EDC)",
-5,"APS/DEV MGMT servers",
-6,"EDC PROD servers",
+2,"Active Directory IS domain servers",internal
+3,"Active Directory OKTE domain servers",internal
+4,"Database servers (EDC)",EDC;external
+5,"APS/DEV MGMT servers",internal
+6,"EDC PROD servers",external;EDC
+7,"AAA servers Linux",internal
+8,"EDC TEST servers",external;EDC
+9,"ADFS servers",
+10,"KIS servers",internal;KIS
+11,"IPL servers (Linux)",external;IPL
+12,"IPL servers (Windows)",external;IPL
+13,"IPL servers Elastic",external;IPL
+14,"IPL servers Kibana",external;IPL
+15,Ausemio,internal
+16,"Database servers (ISO) - PROD",internal;ISZO;ISOT;RRM;ZPE;OZE;ISOM
+17,"Database servers (ISO) - TEST, DEV, SAND",internal;ISZO;ISOT;RRM;ZPE;OZE;ISOM
+18,"Database servers (PMB)",PMB;internal
+19,"DBA MGMT servers",MGMT;internal
+20,"DFS servers is.okte.sk",internal
+21,"EDC UAT servers",external;EDC
+22,Firewall-ISOPRIM,internal;network
+23,Firewall-ISOSEC,internal;network
+24,Firewall-VPN,internal;network
+25,"Hyper-V APP cluster servers",internal
+26,"Hyper-V APP EDC cluster servers",internal;EDC
+27,"Hyper-V APP PMB cluster servers",PMB;internal
+28,"Hyper-V APP TEST cluster servers",internal
+29,"Hyper-V MGMT cluster servers",internal;MGMT
+30,"KISSRV for OKTE users",internal;KIS
+31,"NFQES PROD",NFQES;external
+32,"NFQES TEST",NFQES;external
+33,"NPS servers",internal
+34,OKTEWWW,OKTEWWW;internal
+35,"Primera storage",internal
+36,"Printers Konica Minolta",internal
+37,"Proxy servers",internal
+38,"SAP servers Linux",internal;SAP
+39,"SAP servers Windows",internal;SAP
+40,"SYS MGMT servers",internal;MGMT
+41,"SYS servers",internal;MGMT
+42,"SYS servers IS",internal;MGMT
+43,"SYS servers OKTE SA",internal;MGMT
+44,"XMTRADE - PMB a EUPH",PMB;internal
+45,"XMTRADE ISOT DEV VTD",internal;ISOT
+46,"XMTRADE ISOT PROD VTD",internal;ISOT
+47,"XMTRADE ISOT SAND VTD",internal;ISOT
+48,"XMTRADE ISOT SFTP",internal;ISOT
+49,"XMTRADE ISOT TEST VTD",internal;ISOT
+50,"XMTRADE ISOT TEST2 VTD",internal;ISOT
+51,XMTRADE-ISO,internal;ISO
+52,XMTRADE-ISOM,internal;ISOM
+53,XMTRADE-ISOT,internal;ISOT
+54,XMTRADE-ISZO,internal;ISZO
+55,XMTRADE-RRM,internal;RRM
+56,XMTRADE-ZPE,internal;ZPE
