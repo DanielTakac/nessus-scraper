@@ -147,6 +147,7 @@
 .modal-btn:hover { opacity: 0.9; }
 
 /* target nth column (index starts at 1) */
+/*
 #myTable th:nth-child(1),
 #myTable td:nth-child(1) {
   width: 5px;
@@ -171,6 +172,7 @@
 #myTable td:nth-child(7) {
   max-width: 30px;
 }
+*/
 
 .site-footer {
     text-align: center;
