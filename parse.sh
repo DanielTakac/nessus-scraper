@@ -21,3 +21,6 @@ python3 build_csv.py high.csv
 ./clean_csv.sh critical.csv
 ./clean_csv.sh high.csv
 
+./append_empty_rows.sh ../R/summary.html critical.csv
+./append_empty_rows.sh ../R/summary_high.html high.csv
+
