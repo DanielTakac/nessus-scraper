@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 $sg = $_POST['server_group'] ?? null;
-$tags = $_POST['tags'] ?? '';
+$tags = isset($_POST['tags']) ? preg_replace('/\s+/', '', $_POST['tags']) : '';
 
 if (!$sg) { echo json_encode(['success'=>false]); exit; }
 
