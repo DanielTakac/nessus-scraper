@@ -19,3 +19,5 @@ infile="$1"
 #   \)         literal close paren
 # Those matches are replaced with nothing.
 sed -Ei 's/\((tcp|udp)\/[^)]*\)//g' "$infile"
+
+echo "Done: Cleaned $infile"

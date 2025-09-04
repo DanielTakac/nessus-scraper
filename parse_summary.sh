@@ -7,7 +7,6 @@
 INPUT_FILE=${1:-summary.html}
 OUTPUT_FILE=${2:-summary.csv}
 
-rm $OUTPUT_FILE
 
 # Print header
 printf 'id,Server Group,Link,CVSS v3.0,Servers Affected,Vulnerability\n' > "$OUTPUT_FILE"
@@ -51,5 +50,5 @@ while IFS= read -r line; do
 
 done
 
-echo "Done: wrote $(wc -l < "$OUTPUT_FILE") lines (including header) to $OUTPUT_FILE"
+echo "Done: Wrote $(wc -l < "$OUTPUT_FILE") lines (including header) to $OUTPUT_FILE"
 

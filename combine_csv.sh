@@ -34,4 +34,4 @@ tail -n +2 "$file2" | awk -F, -v OFS=',' -v offset="$last_id" '{
   print
 }' >> "$outfile"
 
-echo "Combined CSV written to $outfile"
+echo "Done: Combined CSV written to $outfile"

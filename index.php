@@ -103,6 +103,18 @@ if (file_exists($extFile) && ($h = fopen($extFile,'r'))) {
 <div id="sumDisplay" style="text-align:center;">
     Total vulnerabilities affecting servers: 0
 </div>
+<pre id="parser-output"
+     style="display:none;
+            border:1px solid #444;
+            background:#111;
+            color:#0f0;
+            padding:10px;
+            height:200px;
+            overflow:auto;
+            white-space:pre-wrap;
+            font-family:monospace;
+            margin-top:10px;">
+</pre>
 <div class="tag-filter-mode">
     <label>Tag Filter Mode:</label>
     <button id="mode-switch" class="mode-btn" data-mode="ALL">AND</button>
@@ -281,22 +293,50 @@ $(document).ready(function() {
     // Keep track of active filter
     var activeFilter = 'all';
 
-$('#run-parse').on('click', function() {
-  $(this).prop('disabled', true).text('⏳ Generating… (~30 seconds)');
+$('#run-parse').on('click', function(){
+  var $btn = $(this);
+  var $log = $('#parser-output');
 
-  $.get('run_parser.php', function(res) {
-    // if (res.message !== "CSV generated successfully") {
-      // alert(res.message);
-    // }
-    console.log(res.output); // see server logs in console
-    location.reload(); // refresh to show new CSVs
-  }, 'json').fail(function() {
-    alert("Error: could not run parser script");
-  }).always(function() {
-    $('#run-parse').prop('disabled', false).text('✅ CSV File Generated');
-  });
+  // 1) Disable button + show empty log
+  $btn.prop('disabled', true).text('⏳ Generating…');
+  $log.text('').show();
+
+  // 2) Kick off the background parser
+  $.getJSON('run_parser.php')
+    .done(function(res){
+      if (!res.success) {
+        alert('Could not start parser');
+        $btn.prop('disabled', false).text('🔄 Refresh Nessus Report');
+        return;
+      }
+      // 3) Poll the log file every 800ms
+      var iv = setInterval(function(){
+        $.ajax({
+          url: 'parser.log?' + Date.now(), // bust cache
+          cache: false,
+          dataType: 'text'
+        }).done(function(txt){
+          // Dump entire contents into the <pre>
+          $log.text(txt);
+          $log.scrollTop($log[0].scrollHeight);
+
+          // Look for DONE marker
+          if (txt.indexOf('=== DONE ===') !== -1) {
+            clearInterval(iv);
+            $btn.prop('disabled', false)
+                .text('✅ CSV File Generated');
+            setTimeout(function(){
+              location.reload();
+            }, 2000);
+          }
+        });
+      }, 800);
+    })
+    .fail(function(){
+      alert('Error starting parser');
+      $btn.prop('disabled', false).text('🔄 Refresh Nessus Report');
+    });
 });
-
 // Keep references
 var modal = $('#tagModal');
 var overlay = $('#tagOverlay');

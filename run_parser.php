@@ -1,22 +1,16 @@
 <?php
 header('Content-Type: application/json');
 
-$script = './parse.sh';
+// 1) Clear any old log
+file_put_contents('parser.log', '');
 
-// Make sure the script exists and is executable
-if (!file_exists($script)) {
-    echo json_encode(['success' => false, 'message' => 'parse.sh not found']);
-    exit;
-}
-if (!is_executable($script)) {
-    chmod($script, 0755);
-}
+// 2) Fire off parse.sh in the background, redirecting both stdout+stderr
+//    nohup and trailing & detach it immediately
+$cmd = 'nohup '.escapeshellcmd(__DIR__.'/parse.sh').' > '.escapeshellarg(__DIR__.'/parser.log').' 2>&1 & echo $!';
+$pid = trim(shell_exec($cmd));
 
-exec($script . ' 2>&1', $output, $return_var);
-
+// 3) Return success + pid
 echo json_encode([
-    'success' => $return_var === 0,
-    'message' => $return_var === 0 ? 'CSV generated successfully' : 'Error running script',
-    'output'  => $output
+  'success' => true,
+  'pid'     => $pid
 ]);
-

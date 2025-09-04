@@ -1,0 +1,35 @@
+--- update_time.sh - Getting new report time ---
+Done: Wrote report update time to time.html
+--- parse_summary.sh - Parsing ../R/summary.html ---
+Done: Wrote 124 lines (including header) to critical.csv
+Done: Wrote 598 lines (including header) to high.csv
+--- enrich_csv.py - Extracting CVSS & Servers Affected from every link ---
+Processed 100/123 rows in 4.5s
+Processed 123/123 rows in 4.5s
+Done: 123 rows, total time 4.5s
+Processed 100/597 rows in 4.9s
+Processed 200/597 rows in 4.9s
+Processed 300/597 rows in 4.9s
+Processed 400/597 rows in 4.9s
+Processed 500/597 rows in 4.9s
+Processed 597/597 rows in 4.9s
+Done: 597 rows, total time 4.9s
+--- build_csv.py - Trimming CVSS and adding full CVSS and Description to extended CSV files ---
+Trimmed CVSS field in  'critical.csv'
+Wrote extended data to 'ext/critical_extended.csv'
+Trimmed CVSS field in  'high.csv'
+Wrote extended data to 'ext/high_extended.csv'
+--- clean_csv.sh - Removing unnecessary protocol and port info from Servers Affected column ---
+Done: Cleaned critical.csv
+Done: Cleaned high.csv
+--- append_empty_rows.sh - Adding empty server groups to CSV files ---
+Done: appended 'no vulnerability' groups. CSV now has 172 lines (incl header).
+Done: appended 'no vulnerability' groups. CSV now has 625 lines (incl header).
+--- append_empty_rows.sh - Adding empty server groups to extended CSV files ---
+Done: appended 'no vulnerability' rows to extended csv
+Done: appended 'no vulnerability' rows to extended csv
+--- combine_csv.sh - Merging critical and high CSV files into combined.csv ---
+Done: Combined CSV written to combined.csv
+Done: Combined CSV written to ext/combined_extended.csv
+
+=== DONE ===

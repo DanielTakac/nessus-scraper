@@ -89,8 +89,8 @@ for idx, row in enumerate(rows,1):
     val = cache.get(path,{}).get(frag,("", ""))
     row["CVSS v3.0"], row["Servers Affected"] = val
 
-    # progress every 50 rows
-    if idx % 50 == 0 or idx == len(rows):
+    # progress every 100 rows
+    if idx % 100 == 0 or idx == len(rows):
         print(f"Processed {idx}/{len(rows)} rows in {time.time()-start:.1f}s", 
               file=sys.stderr)
 
@@ -100,6 +100,6 @@ with open(OUTPUT_CSV, "w", newline='') as fout:
     writer.writeheader()
     writer.writerows(rows)
 
-print(f"Done {len(rows)} rows, total time {time.time()-start:.1f}s", 
+print(f"Done: {len(rows)} rows, total time {time.time()-start:.1f}s", 
       file=sys.stderr)
 
