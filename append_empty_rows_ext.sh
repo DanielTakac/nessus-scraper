@@ -28,17 +28,14 @@ while IFS= read -r line; do
 
   # detect "No critical vulnerability..." OR "No high vulnerability..."
   if [[ $line =~ No[[:space:]]+(critical|high)[[:space:]]+vulnerability ]]; then
-    vuln_text=$(echo "$line" \
-      | sed -E 's/.*(No (critical|high) vulnerability[^<]*).*/\1/' \
-      | sed -E 's/^[[:space:]]+//;s/[[:space:]]+$//')
     if [[ -n "$capture_group" ]]; then
       row_id=$((row_id+1))
-      printf '%d,%s,%s,%s,%s,%s\n' \
-        "$row_id" "$capture_group" "" "" "" "$vuln_text" \
+      printf '%d,0,0\n' \
+        "$row_id" \
         >> "$OUTPUT_FILE"
       capture_group=""
     fi
   fi
 done
 
-echo "Done: appended 'no vulnerability' groups. CSV now has $(wc -l < "$OUTPUT_FILE") lines (incl header)."
+echo "Done: appended 'no vulnerability' rows to extended csv"
