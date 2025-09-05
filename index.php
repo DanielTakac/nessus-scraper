@@ -250,7 +250,7 @@ $(document).ready(function() {
         searchPanes: {
             cascadePanes: true,      // when you pick in one pane it filters the others
             viewTotal: true,         // show counts of matching records
-            layout: 'columns-3'      // how many panes per row
+            layout: 'columns-2'      // how many panes per row
         },
 
         // tell which columns get panes
@@ -259,13 +259,13 @@ $(document).ready(function() {
             searchPanes: {
                 show: true
             },
-            targets: [1,3,5]    // zero-based indexes of columns that will have search panes
+            targets: [1,3]    // zero-based indexes of columns that will have search panes
         },
         {
             searchPanes: {
                 show: false
             },
-            targets: [0,2,4,6]
+            targets: [0,2,4,5,6]
         }
         ]
     });
