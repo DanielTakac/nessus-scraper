@@ -226,7 +226,7 @@ $(document).ready(function() {
 
     var table = $('#myTable').DataTable({
         dom: 'PBfrtip',
-        buttons: ['colvis','pageLength','copy','csv','excel','pdf'],
+        buttons: ['colvis','pageLength','copy','csv','excel'],
         responsive: true,
         paging: true,
         searching: true,
